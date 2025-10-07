@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Microsoft.Data.SqlClient;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ExamScheduler
 
 namespace ExamScheduler.UI
 {
@@ -19,6 +21,11 @@ namespace ExamScheduler.UI
         public MainWindow()
         {
             InitializeComponent();
+
+            // DB bağlantı testi
+            ExamScheduler.Test.Test.TestConnection();
         }
+
+
     }
 }
