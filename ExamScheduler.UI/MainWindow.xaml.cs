@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using ExamScheduler.Data;
+using Microsoft.Data.SqlClient;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +21,24 @@ namespace ExamScheduler.UI
         public MainWindow()
         {
             InitializeComponent();
+            TestEt(); // Uygulama açılırken bağlantıyı test eder
+        }
+
+        private void TestEt()
+        {
+            try
+            {
+                VeriTabaniBaglanti db = new VeriTabaniBaglanti();
+
+                using (SqlConnection conn = db.BaglantiAc())
+                {
+                    MessageBox.Show("✅ Veritabanı bağlantısı başarılı!", "Bağlantı Testi", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"❌ Hata: {ex.Message}", "Bağlantı Hatası", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
