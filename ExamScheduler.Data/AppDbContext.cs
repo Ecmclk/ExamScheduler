@@ -26,6 +26,7 @@ namespace ExamScheduler.Data
             }
         }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<OgrenciDersler>()
