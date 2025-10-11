@@ -1,10 +1,9 @@
-﻿using ClosedXML.Excel;
+﻿using System.Text.RegularExpressions;
+using ClosedXML.Excel;
 using ExamScheduler.Core.Interfaces;
 using ExamScheduler.Models.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions; // Regex için bu satırı ekleyin
+
+// Regex için bu satırı ekleyin
 
 namespace ExamScheduler.Data
 {
@@ -19,6 +18,7 @@ namespace ExamScheduler.Data
             {
                 using var workbook = new XLWorkbook(filePath);
                 var worksheet = workbook.Worksheet(1);
+                string sheetName = worksheet.Name;
 
                 foreach (var row in worksheet.RowsUsed().Skip(1))
                 {
@@ -31,27 +31,31 @@ namespace ExamScheduler.Data
 
                         if (string.IsNullOrWhiteSpace(ogrNo) || string.IsNullOrWhiteSpace(dersKodu))
                         {
+                            result.Errors.Add(new Core.Interfaces.ParseError
+                            {
+                                RowNumber = row.RowNumber(),
+                                Message =
+                                    $"[{sheetName}] Satır {row.RowNumber()}: Öğrenci numarası veya ders kodu boş olamaz."
+                            });
+                            continue;
+                        }
+
+                        var sayiEslesmesi = Regex.Match(sinifStr, @"\d+");
+                        string sinifSayiStr = sayiEslesmesi.Success ? sayiEslesmesi.Value : sinifStr;
+
+                        if (!byte.TryParse(sinifSayiStr, out byte sinif))
+                        {
+                            result.Errors.Add(new Core.Interfaces.ParseError
+                            {
+                                RowNumber = row.RowNumber(),
+                                Message =
+                                    $"[{sheetName}] Satır {row.RowNumber()}: '{sinifStr}' geçerli bir sınıf değeri değil."
+                            });
                             continue;
                         }
 
                         if (!uniqueStudents.TryGetValue(ogrNo, out var ogrenci))
                         {
-                            // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
-                            // "1.sınıf" gibi bir metinden sadece sayıyı çekmek için.
-                            var sayiEslesmesi = Regex.Match(sinifStr, @"\d+");
-                            string sinifSayiStr = sayiEslesmesi.Success ? sayiEslesmesi.Value : sinifStr;
-                            // --- DEĞİŞİKLİK BURADA BİTİYOR ---
-
-                            if (!byte.TryParse(sinifSayiStr, out byte sinif))
-                            {
-                                result.Errors.Add(new ExamScheduler.Core.Interfaces.ParseError
-                                {
-                                    RowNumber = row.RowNumber(),
-                                    Message = $"'{sinifStr}' geçerli bir sınıf değeri değil."
-                                });
-                                continue;
-                            }
-
                             ogrenci = new Ogrenciler
                             {
                                 OgrenciNo = ogrNo,
@@ -62,29 +66,28 @@ namespace ExamScheduler.Data
                             uniqueStudents.Add(ogrNo, ogrenci);
                         }
 
-                        var ogrDers = new OgrenciDersler
+                        result.Data.Add(new OgrenciDersler
                         {
                             Ogrenci = ogrenci,
                             Ders = new Dersler { DersKodu = dersKodu }
-                        };
-                        result.Data.Add(ogrDers);
+                        });
                     }
                     catch (Exception ex)
                     {
-                        result.Errors.Add(new ExamScheduler.Core.Interfaces.ParseError
+                        result.Errors.Add(new Core.Interfaces.ParseError
                         {
                             RowNumber = row.RowNumber(),
-                            Message = $"Satır işlenirken bir hata oluştu: {ex.Message}"
+                            Message = $"[{worksheet.Name}] Satır {row.RowNumber()} işlenirken hata: {ex.Message}"
                         });
                     }
                 }
             }
             catch (Exception ex)
             {
-                result.Errors.Add(new ExamScheduler.Core.Interfaces.ParseError
+                result.Errors.Add(new Core.Interfaces.ParseError
                 {
                     RowNumber = 0,
-                    Message = $"Excel dosyası okunurken genel bir hata oluştu: {ex.Message}"
+                    Message = $"Excel dosyası okunamadı ({Path.GetFileName(filePath)}): {ex.Message}"
                 });
             }
 

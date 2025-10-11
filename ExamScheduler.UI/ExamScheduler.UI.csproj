@@ -40,6 +40,7 @@
     <ProjectReference Include="..\ExamScheduler.Core\ExamScheduler.Core.csproj" />
     <ProjectReference Include="..\ExamScheduler.Data\ExamScheduler.Data.csproj" />
     <ProjectReference Include="..\ExamScheduler.Models\ExamScheduler.Models.csproj" />
+    <ProjectReference Include="..\ExamScheduler.Services\ExamScheduler.Services.csproj" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="https://www.schemastore.org/appveyor.json" /></VisualStudio></ProjectExtensions>
