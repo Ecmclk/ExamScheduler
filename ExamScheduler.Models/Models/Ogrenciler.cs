@@ -28,4 +28,8 @@ public partial class Ogrenciler
     [ForeignKey("BolumId")]
     [InverseProperty("Ogrencilers")]
     public virtual Bolumler Bolum { get; set; } = null!;
+    
+    [InverseProperty("Ogrenci")]
+    public virtual ICollection<OgrenciDersler> OgrenciDersler { get; set; } = new List<OgrenciDersler>();
+
 }

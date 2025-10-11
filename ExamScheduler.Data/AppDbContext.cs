@@ -1,35 +1,44 @@
 ﻿using ExamScheduler.Models.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExamScheduler.Data
 {
     public class AppDbContext : DbContext
     {
-        public DbSet<Bolumler> Bolumler { get; set; }
-        public DbSet<Dersler> Dersler { get; set; }
-        public DbSet<Derslikler> Derslikler { get; set; }
-        public DbSet<Kullanicilar> Kullanicilar { get; set; }
-        public DbSet<Ogrenciler> Ogrenciler { get; set; }
-        public DbSet<Roller> Roller { get; set; }
+        public AppDbContext() { }
+
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options) { }
+
+        public DbSet<Bolumler> Bolumler { get; set; } = null!;
+        public DbSet<Dersler> Dersler { get; set; } = null!;
+        public DbSet<Derslikler> Derslikler { get; set; } = null!;
+        public DbSet<Kullanicilar> Kullanicilar { get; set; } = null!;
+        public DbSet<Ogrenciler> Ogrenciler { get; set; } = null!;
+        public DbSet<OgrenciDersler> OgrenciDersler { get; set; } = null!;
+        public DbSet<Roller> Roller { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Mevcut veritabanına bağlanacak bağlantı
-                optionsBuilder.UseSqlServer(
-                    @"Server=(localdb)\MSSQLLocalDB;Database=SinavPlanlayiciDB;Trusted_Connection=True;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=SinavPlanlayiciDB;Trusted_Connection=True;");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Burayı şimdilik boş bırakabilirsin
+            modelBuilder.Entity<OgrenciDersler>()
+                .HasOne(od => od.Ogrenci)
+                .WithMany(o => o.OgrenciDersler)
+                .HasForeignKey(od => od.OgrenciId)
+                .OnDelete(DeleteBehavior.Restrict); // burada cascade iptal
+
+            modelBuilder.Entity<OgrenciDersler>()
+                .HasOne(od => od.Ders)
+                .WithMany(d => d.OgrenciDersler)
+                .HasForeignKey(od => od.DersId)
+                .OnDelete(DeleteBehavior.Cascade); // diğerinde bırakabilirsin
         }
     }
 }

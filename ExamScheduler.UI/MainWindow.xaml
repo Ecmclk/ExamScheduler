@@ -1,12 +1,21 @@
 ﻿<Window x:Class="ExamScheduler.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ExamScheduler.UI"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Sınav Planlayıcı" Height="350" Width="400">
 
-    </Grid>
+    <StackPanel Margin="20" VerticalAlignment="Center" HorizontalAlignment="Center">
+
+        <Button x:Name="BtnImportCourses"
+                Content="📘 Ders Listesi Excel Yükle"
+                Width="250" Height="40"
+                Margin="0,0,0,10"
+                Click="BtnImportCourses_Click"/>
+
+        <Button x:Name="BtnImportStudents"
+                Content="🧑‍🎓 Öğrenci Listesi Excel Yükle"
+                Width="250" Height="40"
+                Margin="0,0,0,10"
+                Click="BtnImportStudents_Click"/>
+
+    </StackPanel>
 </Window>
