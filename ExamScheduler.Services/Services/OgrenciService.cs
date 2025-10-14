@@ -67,6 +67,41 @@ public class OgrenciService
             result.Success = result.Errors.Count == 0;
             return result;
         }
+        
+        public async Task<List<Ogrenciler>> GetAllOgrencilerAsync()
+        {
+            return await _dbContext.Ogrenciler
+                .Include(o => o.OgrenciDersler)
+                .ThenInclude(od => od.Ders)
+                .ToListAsync();
+        }
+        
+        public async Task<Ogrenciler?> GetOgrenciWithDerslerAsync(string ogrNo)
+        {
+            return await _dbContext.Ogrenciler
+                .Where(o => o.OgrenciNo == ogrNo)
+                .Include(o => o.OgrenciDersler)
+                .ThenInclude(od => od.Ders)
+                .FirstOrDefaultAsync();
+        }
+        
+        public async Task<List<object>> GetFlatOgrenciDersListAsync()
+        {
+            var ogrenciler = await _dbContext.Ogrenciler
+                .Include(o => o.OgrenciDersler)
+                .ThenInclude(od => od.Ders)
+                .ToListAsync();
+
+            var flatList = ogrenciler.SelectMany(o => o.OgrenciDersler.Select(od => new
+            {
+                OgrenciNo = o.OgrenciNo,
+                AdSoyad = o.AdSoyad,
+                DersKodu = od.Ders.DersKodu,
+                DersAdi = od.Ders.DersAdi
+            })).ToList<object>();
+
+            return flatList;
+        }
     }
 
     public class SaveResult

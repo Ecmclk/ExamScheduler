@@ -41,8 +41,46 @@ namespace ExamScheduler.Services
             result.Success = result.Errors.Count == 0;
             return result;
         }
+        
+        public async Task<List<Dersler>> GetAllDerslerAsync()
+        {
+            return await _dbContext.Dersler
+                .Include(d => d.OgrenciDersler)
+                .ThenInclude(od => od.Ogrenci)
+                .ToListAsync();
+        }
+        
+        public async Task<List<Ogrenciler>> GetOgrencilerByDersIdAsync(int dersId)
+        {
+            var ders = await _dbContext.Dersler
+                .Include(d => d.OgrenciDersler)
+                .ThenInclude(od => od.Ogrenci)
+                .FirstOrDefaultAsync(d => d.DersId == dersId);
+
+            return ders?.OgrenciDersler.Select(od => od.Ogrenci).ToList() ?? new List<Ogrenciler>();
+        }
+        
+        public async Task<List<object>> GetFlatDersListAsync()
+        {
+            var dersler = await _dbContext.Dersler
+                .Include(d => d.OgrenciDersler)
+                .ThenInclude(od => od.Ogrenci)
+                .ToListAsync();
+
+            var flatList = dersler.Select(d => new
+            {
+                DersId = d.DersId,      // <-- burayı ekle
+                DersKodu = d.DersKodu,
+                DersAdi = d.DersAdi,
+                OgrenciSayisi = d.OgrenciDersler.Count
+            }).ToList<object>();
+
+            return flatList;
+        }
+
     }
 
+ 
     public class SaveResultDers
     {
         public bool Success { get; set; } = true;
