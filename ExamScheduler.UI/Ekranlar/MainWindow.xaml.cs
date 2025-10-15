@@ -1,22 +1,49 @@
 ﻿using ExamScheduler.Models;
 using ExamScheduler.Models.Models;
-using System.Collections.Generic;
+using ExamScheduler.Services;
+using ExamScheduler.UI.Ekranlar;
 using System.Windows;
 
-// DİKKAT: namespace, dosyanın 'Ekranlar' klasöründe olduğunu belirtiyor
-namespace ExamScheduler.UI.Ekranlar
+namespace ExamScheduler.UI
 {
-    public partial class MainPanelWindow : Window
+    public partial class MainWindow : Window
     {
-        private readonly Kullanicilar _currentUser;
+        // Artık AppDbContext'e doğrudan ihtiyacımız yok, sadece servise ihtiyacımız var.
+        private readonly UserService _userService;
 
-        // Constructor, giriş yapan kullanıcıyı kabul edecek şekilde hazırlandı.
-        public MainPanelWindow(Kullanicilar user)
+        // Constructor'ı, bir UserService alacak şekilde güncelliyoruz.
+        public MainWindow(UserService userService)
         {
             InitializeComponent();
-            _currentUser = user;
 
-            // TODO: Rol tabanlı yetkilendirme ve veri yükleme kodları buraya gelecek.
+            // Dışarıdan gelen servisi kendi değişkenimize atıyoruz.
+            // Artık 'new' ile yeniden oluşturmuyoruz!
+            _userService = userService;
+        }
+
+        private void GirisYapButton_Click(object sender, RoutedEventArgs e)
+        {
+            string email = EpostaTextBox.Text;
+            string password = SifrePasswordBox.Password;
+
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show("E-posta ve şifre alanları boş bırakılamaz.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            Kullanicilar? user = _userService.ValidateUser(email, password);
+
+            if (user != null)
+            {
+                MainPanelWindow mainPanel = new MainPanelWindow(user);
+                mainPanel.Show();
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Hatalı e-posta veya şifre. Lütfen tekrar deneyin.", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

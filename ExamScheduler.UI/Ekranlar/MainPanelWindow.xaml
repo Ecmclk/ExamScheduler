@@ -35,28 +35,6 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
-        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#718096"/>
-            <Setter Property="Padding" Value="10,12"/>
-            <Setter Property="BorderThickness" Value="0,0,0,2"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
-        </Style>
-        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
-            <Setter Property="Padding" Value="10,12"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
-            <Setter Property="BorderThickness" Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#EDF2F7"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
     </Window.Resources>
 
     <Grid>
@@ -71,31 +49,28 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
             <StackPanel Grid.Row="0">
                 <TextBlock Text="SINAV PLANLAYICI" Foreground="White" FontSize="22" FontWeight="Bold" Margin="20,25" HorizontalAlignment="Center"/>
                 <Border Background="#4A5568" CornerRadius="8" Padding="15" Margin="15,10">
                     <StackPanel Orientation="Horizontal">
                         <Ellipse Fill="Gray" Width="40" Height="40"/>
                         <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Sistem Yöneticisi" Foreground="White" FontWeight="Bold"/>
-                            <TextBlock Text="Admin" Foreground="#A0AEC0" FontSize="12"/>
+                            <TextBlock x:Name="KullaniciAdSoyadText" Text="Sistem Yöneticisi" Foreground="White" FontWeight="Bold"/>
+                            <TextBlock x:Name="KullaniciRolText" Text="Admin" Foreground="#A0AEC0" FontSize="12"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
-
             <StackPanel Grid.Row="1" Margin="0,10">
-                <Button Style="{StaticResource NavButtonStyle}" Content="📊 Kontrol Paneli" Background="#4A5568" Foreground="White"/>
-                <Button Style="{StaticResource NavButtonStyle}" Content="🏢 Bölümler"/>
-                <Button Style="{StaticResource NavButtonStyle}" Content="👥 Kullanıcılar"/>
-                <Button Style="{StaticResource NavButtonStyle}" Content="🚪 Derslikler"/>
-                <Button Style="{StaticResource NavButtonStyle}" Content="📚 Dersler"/>
-                <Button Style="{StaticResource NavButtonStyle}" Content="🎓 Öğrenciler"/>
-                <Button Style="{StaticResource NavButtonStyle}" Content="⚙️ Sınav Ayarları"/>
+                <Button x:Name="KontrolPaneliMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="📊 Kontrol Paneli"/>
+                <Button x:Name="BolumlerMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="🏢 Bölümler"/>
+                <Button x:Name="KullanicilarMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="👥 Kullanıcılar"/>
+                <Button x:Name="DersliklerMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="🚪 Derslikler"/>
+                <Button x:Name="DerslerMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="📚 Dersler"/>
+                <Button x:Name="OgrencilerMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="🎓 Öğrenciler"/>
+                <Button x:Name="SinavAyarlariMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="⚙️ Sınav Ayarları"/>
             </StackPanel>
-
-            <Button Grid.Row="2" Style="{StaticResource NavButtonStyle}" Content="🚪 Çıkış" Background="#C53030" Foreground="White" Margin="15,20"/>
+            <Button x:Name="CikisButton" Click="CikisButton_Click" Grid.Row="2" Style="{StaticResource NavButtonStyle}" Content="🚪 Çıkış" Background="#C53030" Foreground="White" Margin="15,20"/>
         </Grid>
 
         <Grid Grid.Column="1">
@@ -106,55 +81,14 @@
 
             <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
                 <Grid Margin="25,0">
-                    <TextBox Text="Ara..." Foreground="Gray" Width="350" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="10,8" BorderBrush="#CBD5E0" BorderThickness="1" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <TextBlock Text="Hoş geldiniz, Admin" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#4A5568"/>
+                        <TextBlock x:Name="WelcomeMessageText" Text="Hoş geldiniz, Admin" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#4A5568"/>
                         <Ellipse Fill="DarkGray" Width="35" Height="35" VerticalAlignment="Center" Margin="15,0,0,0"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <Grid Margin="30">
-                    <StackPanel>
-                        <TextBlock Text="Kullanıcı Yönetimi" FontSize="28" FontWeight="Bold" Margin="0,0,0,25"/>
-                        <Border Background="White" CornerRadius="8" Padding="25">
-                            <StackPanel>
-                                <TextBlock Text="Yeni Koordinatör Ekle" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Grid.Column="0" Text="Ad Soyad" Margin="0,0,10,0" Padding="8"/>
-                                    <TextBox Grid.Column="1" Text="E-posta" Margin="0,0,10,0" Padding="8"/>
-                                    <PasswordBox Grid.Column="2" Margin="0,0,10,0" Padding="8"/>
-                                    <Button Grid.Column="3" Content="Koordinatör Ekle" Background="#3182CE" Foreground="White" FontWeight="SemiBold" Padding="20,8" BorderThickness="0"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
-                        <TextBlock Text="Mevcut Kullanıcılar" FontSize="18" FontWeight="SemiBold" Margin="0,30,0,15"/>
-                        <DataGrid Name="UsersDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
-                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" 
-                                  Background="White" BorderThickness="1" BorderBrush="#E2E8F0"
-                                  RowStyle="{StaticResource DataGridRowStyle}"
-                                  CellStyle="{StaticResource DataGridCellStyle}"
-                                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
-                                <DataGridTextColumn Header="Ad Soyad" Binding="{Binding AdSoyad}" Width="*"/>
-                                <DataGridTextColumn Header="Rol" Binding="{Binding Rol}" Width="150"/>
-                                <DataGridTextColumn Header="E-posta" Binding="{Binding Eposta}" Width="*"/>
-                                <DataGridTextColumn Header="Bölüm" Binding="{Binding Bolum}" Width="180"/>
-                                <DataGridTextColumn Header="Durum" Binding="{Binding Durum}" Width="100"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
-                </Grid>
-            </ScrollViewer>
+            <ContentControl x:Name="MainContentArea" Grid.Row="1" Margin="30"/>
         </Grid>
     </Grid>
 </Window>
