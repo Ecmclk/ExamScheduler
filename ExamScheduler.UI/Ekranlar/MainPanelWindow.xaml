@@ -1,0 +1,94 @@
+﻿<Window x:Class="ExamScheduler.UI.Ekranlar.MainPanelWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExamScheduler.UI.Ekranlar"
+        mc:Ignorable="d"
+        Title="Yönetim Paneli" Height="720" Width="1280"
+        WindowStartupLocation="CenterScreen"
+        Background="#F7FAFC">
+    <Window.Resources>
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#A0AEC0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Margin" Value="15,5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#4A5568"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Background="#2D3748">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="SINAV PLANLAYICI" Foreground="White" FontSize="22" FontWeight="Bold" Margin="20,25" HorizontalAlignment="Center"/>
+                <Border Background="#4A5568" CornerRadius="8" Padding="15" Margin="15,10">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Fill="Gray" Width="40" Height="40"/>
+                        <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock x:Name="KullaniciAdSoyadText" Text="Sistem Yöneticisi" Foreground="White" FontWeight="Bold"/>
+                            <TextBlock x:Name="KullaniciRolText" Text="Admin" Foreground="#A0AEC0" FontSize="12"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Margin="0,10">
+                <Button x:Name="KontrolPaneliMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="📊 Kontrol Paneli"/>
+                <Button x:Name="BolumlerMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="🏢 Bölümler"/>
+                <Button x:Name="KullanicilarMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="👥 Kullanıcılar"/>
+                <Button x:Name="DersliklerMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="🚪 Derslikler"/>
+                <Button x:Name="DerslerMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="📚 Dersler"/>
+                <Button x:Name="OgrencilerMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="🎓 Öğrenciler"/>
+                <Button x:Name="SinavAyarlariMenuButton" Click="MenuButton_Click" Style="{StaticResource NavButtonStyle}" Content="⚙️ Sınav Ayarları"/>
+            </StackPanel>
+            <Button x:Name="CikisButton" Click="CikisButton_Click" Grid.Row="2" Style="{StaticResource NavButtonStyle}" Content="🚪 Çıkış" Background="#C53030" Foreground="White" Margin="15,20"/>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,0,0,1">
+                <Grid Margin="25,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock x:Name="WelcomeMessageText" Text="Hoş geldiniz, Admin" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#4A5568"/>
+                        <Ellipse Fill="DarkGray" Width="35" Height="35" VerticalAlignment="Center" Margin="15,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <ContentControl x:Name="MainContentArea" Grid.Row="1" Margin="30"/>
+        </Grid>
+    </Grid>
+</Window>

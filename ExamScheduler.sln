@@ -4,12 +4,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamScheduler.UI", "ExamScheduler.UI\ExamScheduler.UI.csproj", "{A4BA2A0C-180F-400A-9780-4E3E8AF9BBF2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{45D47183-8300-4CB8-BE96-B294C5DD64BD} = {45D47183-8300-4CB8-BE96-B294C5DD64BD}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamScheduler.Models", "ExamScheduler.Models\ExamScheduler.Models.csproj", "{6F932A8A-6F1C-4A11-93BB-1003051DB46D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamScheduler.Data", "ExamScheduler.Data\ExamScheduler.Data.csproj", "{3C76012F-F1CA-47CD-9C90-52C15E22B945}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamScheduler.Core", "ExamScheduler.Core\ExamScheduler.Core.csproj", "{439CC493-218B-4EFE-9E08-F0D3BE56D781}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamScheduler.Services", "ExamScheduler.Services\ExamScheduler.Services.csproj", "{45D47183-8300-4CB8-BE96-B294C5DD64BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3C76012F-F1CA-47CD-9C90-52C15E22B945} = {3C76012F-F1CA-47CD-9C90-52C15E22B945}
+		{6F932A8A-6F1C-4A11-93BB-1003051DB46D} = {6F932A8A-6F1C-4A11-93BB-1003051DB46D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +42,10 @@ Global
 		{439CC493-218B-4EFE-9E08-F0D3BE56D781}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{439CC493-218B-4EFE-9E08-F0D3BE56D781}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{439CC493-218B-4EFE-9E08-F0D3BE56D781}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45D47183-8300-4CB8-BE96-B294C5DD64BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45D47183-8300-4CB8-BE96-B294C5DD64BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45D47183-8300-4CB8-BE96-B294C5DD64BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45D47183-8300-4CB8-BE96-B294C5DD64BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
