@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
-using ExamScheduler.Data;
+﻿﻿using ExamScheduler.Data;
 using ExamScheduler.Models;
 using ExamScheduler.Models.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 
 namespace ExamScheduler.Services
@@ -62,5 +63,69 @@ namespace ExamScheduler.Services
                 passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password)); // Salt kullanılarak hash hesaplanır.
             }
         }
+        public List<Kullanicilar> GetAllUsers()
+        {
+            // .Include() metotları, Entity Framework'e Kullanicilar tablosunu çekerken,
+            // onlara bağlı olan Rol ve Bolum tablolarındaki verileri de getirmesini söyler.
+            return _context.Kullanicilar
+                           .Include(u => u.Rol)
+                           .Include(u => u.Bolum)
+                           .ToList();
+        }
+        public bool AddUser(string adSoyad, string eposta, string sifre, int rolId, int bolumId)
+        {
+            // 1. Kontrol: Bu e-posta ile başka bir kullanıcı var mı?
+            if (_context.Kullanicilar.Any(u => u.Eposta == eposta))
+            {
+                return false; // Varsa, işlem başarısız.
+            }
+
+            // 2. Şifreyi hash'le.
+            CreatePasswordHash(sifre, out byte[] passwordHash, out byte[] passwordSalt);
+
+            // 3. Yeni kullanıcı nesnesini oluştur.
+            var newUser = new Kullanicilar
+            {
+                AdSoyad = adSoyad,
+                Eposta = eposta,
+                SifreHash = passwordHash,
+                SifreSalt = passwordSalt,
+                RolId = rolId,
+                BolumId = bolumId,
+                Aktiflik = true // Yeni kullanıcı varsayılan olarak aktif olsun.
+            };
+
+            // 4. Veritabanına ekle ve kaydet.
+            _context.Kullanicilar.Add(newUser);
+            _context.SaveChanges();
+
+            return true; // İşlem başarılı.
+        }
+        public bool DeleteUser(int kullaniciId)
+        {
+            // 1. Silinecek kullanıcıyı ID'sine göre veritabanında bul.
+            var userToDelete = _context.Kullanicilar.FirstOrDefault(u => u.KullaniciId == kullaniciId);
+
+            // 2. Kullanıcı bulunamazsa, işlemi durdur ve başarısız olarak dön.
+            if (userToDelete == null)
+            {
+                return false;
+            }
+
+            // 3. Admin kullanıcısının (RolId = 1) silinmesini engelle.
+            // Bu, sistemin yöneticisiz kalmasını önler.
+            if (userToDelete.RolId == 1)
+            {
+                // İsteğe bağlı: Burada bir hata fırlatabilir veya sadece false dönebiliriz.
+                return false;
+            }
+
+            // 4. Kullanıcıyı veritabanından sil ve değişiklikleri kaydet.
+            _context.Kullanicilar.Remove(userToDelete);
+            _context.SaveChanges();
+
+            return true; // İşlem başarılı.
+        }
+
     }
 }

@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="ExamScheduler.UI.Ekranlar.KullaniciYonetimi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:ExamScheduler.UI.Ekranlar"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="950">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <TextBlock Text="Kullanıcı Yönetimi" FontSize="28" FontWeight="Bold" Margin="0,0,0,25"/>
+
+            <!-- Koordinatör ekleme formu -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <TextBox x:Name="AdSoyadTextBox" Width="200" Height="35" Margin="0,0,10,0" Padding="8" Text="Ad Soyad"/>
+                <TextBox x:Name="EpostaTextBox" Width="200" Height="35" Margin="0,0,10,0" Padding="8" Text="E-posta"/>
+                <PasswordBox x:Name="SifrePasswordBox" Width="200" Height="35" Margin="0,0,10,0" Padding="8"/>
+                <ComboBox x:Name="BolumComboBox" Width="200" Height="35" Padding="8" VerticalContentAlignment="Center"/>
+                <Button Content="Koordinatör Ekle" Width="180" Padding="10,6" Click="EkleButton_Click"/>
+            </StackPanel>
+
+            <!-- Kullanıcı listesi -->
+            <TextBlock Text="Sistemdeki Kullanıcılar" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+            <DataGrid x:Name="UsersDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      Background="White" BorderThickness="1" BorderBrush="#E2E8F0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                    <DataGridTextColumn Header="Ad Soyad" Binding="{Binding AdSoyad}" Width="*"/>
+                    <DataGridTextColumn Header="E-posta" Binding="{Binding Eposta}" Width="200"/>
+                    <DataGridTextColumn Header="Rol" Binding="{Binding Rol}" Width="150"/>
+                    <DataGridTextColumn Header="Bölüm" Binding="{Binding Bolum}" Width="200"/>
+                    <DataGridTextColumn Header="Durum" Binding="{Binding Durum}" Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

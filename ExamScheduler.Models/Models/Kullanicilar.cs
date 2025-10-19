@@ -17,10 +17,10 @@ public partial class Kullanicilar
     [StringLength(150)]
     public string Eposta { get; set; } = null!;
 
-    [MaxLength(64)]
+    [MaxLength(128)]
     public byte[] SifreHash { get; set; } = null!;
 
-    [MaxLength(32)]
+    [MaxLength(128)]
     public byte[] SifreSalt { get; set; } = null!;
 
     [StringLength(120)]

@@ -1,44 +1,80 @@
 ﻿<Window x:Class="ExamScheduler.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Sınav Planlayıcı" Height="600" Width="600">
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Exam Scheduler - Giriş"
+        Height="500" Width="850"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="#F7FAFC">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="20" VerticalAlignment="Top" HorizontalAlignment="Center">
-             <!-- Excel Yükleme Butonları -->
-                <Button x:Name="BtnImportCourses" Content="📘 Ders Listesi Excel Yükle" Width="250" Height="40" Margin="0,0,0,10" Click="BtnImportCourses_Click"/>
-                <Button x:Name="BtnImportStudents" Content="🧑‍🎓 Öğrenci Listesi Excel Yükle" Width="250" Height="40" Margin="0,0,0,20" Click="BtnImportStudents_Click"/>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
 
-                <!-- Menü Butonları -->
-                <Button x:Name="BtnShowCourses" Content="📋 Ders Listesi Menüsü" Width="250" Height="40" Margin="0,0,0,10" Click="BtnShowCourses_Click"/>
-                <Button x:Name="BtnShowStudents" Content="📋 Öğrenci Listesi Menüsü" Width="250" Height="40" Margin="0,0,0,20" Click="BtnShowStudents_Click"/>
-    
-                <!-- Öğrenci Arama -->
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBox x:Name="TxtOgrenciNo" Width="150" Height="30" Margin="0,0,10,0"/>
-                        <Button x:Name="BtnSearchStudent" Content="Ara" Width="50" Height="30" Click="BtnSearchStudent_Click"/>
-                </StackPanel>
-    
-                <Label x:Name="LblOgrenciAdSoyad" Content="Öğrenci: " Width="350" Height="30" Margin="0,0,0,5"/>
-                <ListBox x:Name="LstOgrenciDersler" Width="350" Height="150" Margin="0,0,0,20" />
+        <!-- Sol taraf: Logo ve sistem adı -->
+        <Border Background="#2B6CB0">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Exam Scheduler"
+                           Foreground="White"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,10"/>
+                <TextBlock Text="Sınav Planlama Sistemi"
+                           Foreground="White"
+                           FontSize="16"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
 
-                <!-- Ders Listesi -->
-                <Label Content="Genel Ders Listesi:" FontWeight="Bold" Margin="0,0,0,5"/>
-                <DataGrid x:Name="DataGridMain"
-                          AutoGenerateColumns="True"
-                          Height="250"
-                          Width="550"
-                          SelectionChanged="DataGridMain_SelectionChanged"/>
+        <!-- Sağ taraf: Giriş formu -->
+        <Grid Grid.Column="1" >
+            <StackPanel VerticalAlignment="Center" Margin="80,0,80,0">
 
-                <!-- Seçilen derse ait öğrenciler -->
-                <Label Content="Seçilen Derse Kayıtlı Öğrenciler:" FontWeight="Bold" Margin="0,10,0,5"/>
-                <DataGrid x:Name="DataGridOgrenciler"
-                          AutoGenerateColumns="True"
-                          Height="200"
-                          Width="550"/>
-        </StackPanel>
-    </ScrollViewer>
+                <TextBlock Text="Giriş Yap"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Margin="0,0,0,30"
+                           Foreground="#2D3748"
+                           HorizontalAlignment="Center"/>
 
-     
+                <TextBlock Text="E-posta" FontWeight="SemiBold" Foreground="#4A5568"/>
+                <TextBox x:Name="EpostaTextBox" Height="40" Margin="0,5,0,15"
+                         Padding="10"
+                         FontSize="14"/>
 
+                <TextBlock Text="Şifre" FontWeight="SemiBold" Foreground="#4A5568"/>
+                <PasswordBox x:Name="SifreBox" Height="40" Margin="0,5,0,25"
+                             Padding="10"
+                             FontSize="14"/>
+
+                <Button Content="Giriş Yap"
+                        Height="45"
+                        Background="#2B6CB0"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        Click="GirisButton_Click"/>
+
+                <Button Content="Test Kullanıcı Ekle"
+                        Height="35"
+                        Background="#38A169"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        Margin="0,20,0,0"
+                        Click="TestUserEkleButton_Click"/>
+
+                <TextBlock x:Name="UyariText"
+                           Text=""
+                           Foreground="Red"
+                           FontWeight="SemiBold"
+                           Margin="0,20,0,0"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
 </Window>

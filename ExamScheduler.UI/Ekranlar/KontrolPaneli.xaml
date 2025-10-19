@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="ExamScheduler.UI.Ekranlar.KontrolPaneli"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:ExamScheduler.UI.Ekranlar"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="950">
+    <Grid Background="#F7FAFC">
+        <StackPanel Margin="40">
+            <TextBlock Text="Kontrol Paneli" FontSize="28" FontWeight="Bold" Margin="0,0,0,30"/>
+
+            <UniformGrid Columns="3" Rows="2" Margin="0,0,0,30" HorizontalAlignment="Stretch">
+                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Toplam Bölüm" FontSize="16" Foreground="#4A5568"/>
+                        <TextBlock x:Name="BolumSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Toplam Ders" FontSize="16" Foreground="#4A5568"/>
+                        <TextBlock x:Name="DersSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Toplam Öğrenci" FontSize="16" Foreground="#4A5568"/>
+                        <TextBlock x:Name="OgrenciSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Toplam Kullanıcı" FontSize="16" Foreground="#4A5568"/>
+                        <TextBlock x:Name="KullaniciSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Toplam Derslik" FontSize="16" Foreground="#4A5568"/>
+                        <TextBlock x:Name="DerslikSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
+                <Button Content="Bölüm Yönetimi" Padding="15,8" Width="180" Margin="10" Click="BolumButton_Click"/>
+                <Button Content="Ders Yönetimi" Padding="15,8" Width="180" Margin="10" Click="DersButton_Click"/>
+                <Button Content="Öğrenci Yönetimi" Padding="15,8" Width="180" Margin="10" Click="OgrenciButton_Click"/>
+                <Button Content="Kullanıcı Yönetimi" Padding="15,8" Width="180" Margin="10" Click="KullaniciButton_Click"/>
+                <Button Content="Derslik Yönetimi" Padding="15,8" Width="180" Margin="10" Click="DerslikButton_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

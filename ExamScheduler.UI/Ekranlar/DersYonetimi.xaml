@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="ExamScheduler.UI.Ekranlar.DersYonetimi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="950">
+    <UserControl.Resources>
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#718096"/>
+            <Setter Property="Padding" Value="10,12"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+        </Style>
+        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="Padding" Value="10,12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#EDF2F7"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <TextBlock Text="Ders Yönetimi" FontSize="28" FontWeight="Bold" Margin="0,0,0,25"/>
+
+            <!-- Excel Yükleme Alanı -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <TextBlock Text="Excel'den Ders Listesi Yükle:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0"/>
+                <Button Content="Excel Dosyası Seç ve Yükle" Padding="10,6" Click="ExcelYukleButton_Click"/>
+            </StackPanel>
+
+            <!-- Bölüme göre filtreleme -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                <TextBlock Text="Bölüme Göre Filtrele:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0"/>
+                <ComboBox x:Name="BolumFiltreComboBox" Width="250" Padding="8" VerticalContentAlignment="Center"
+                          SelectionChanged="BolumFiltreComboBox_SelectionChanged"/>
+                <Button x:Name="FiltreyiTemizleButton" Content="Filtreyi Temizle" Margin="10,0,0,0" Padding="10,5"
+                        Click="FiltreyiTemizleButton_Click"/>
+            </StackPanel>
+
+            <!-- Ders Listesi -->
+            <TextBlock Text="Sistemdeki Dersler" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+            <DataGrid x:Name="DerslerDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      Background="White" BorderThickness="1" BorderBrush="#E2E8F0"
+                      RowStyle="{StaticResource DataGridRowStyle}"
+                      CellStyle="{StaticResource DataGridCellStyle}"
+                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                      SelectionMode="Single"
+                      SelectedCellsChanged="DerslerDataGrid_SelectedCellsChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding DersId}" Width="60"/>
+                    <DataGridTextColumn Header="Ders Kodu" Binding="{Binding DersKodu}" Width="150"/>
+                    <DataGridTextColumn Header="Ders Adı" Binding="{Binding DersAdi}" Width="*"/>
+                    <DataGridTextColumn Header="Öğretim Görevlisi" Binding="{Binding OgretimGorevlisi}" Width="200"/>
+                    <DataGridTextColumn Header="Bölüm" Binding="{Binding Bolum.BolumAd}" Width="200"/>
+                    <DataGridTemplateColumn Header="İşlemler" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Sil" Background="#E53E3E" Foreground="White" FontWeight="SemiBold"
+                                        Click="SilDersButton_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Dersi Alan Öğrenciler -->
+            <TextBlock Text="Dersi Alan Öğrenciler" FontSize="18" FontWeight="SemiBold" Margin="0,20,0,15"/>
+            <DataGrid x:Name="OgrencilerDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      Background="White" BorderThickness="1" BorderBrush="#E2E8F0"
+                      RowStyle="{StaticResource DataGridRowStyle}"
+                      CellStyle="{StaticResource DataGridCellStyle}"
+                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Öğrenci No" Binding="{Binding OgrenciNo}" Width="150"/>
+                    <DataGridTextColumn Header="Ad - Soyad" Binding="{Binding AdSoyad}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

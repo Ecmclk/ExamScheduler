@@ -43,6 +43,14 @@
     <ProjectReference Include="..\ExamScheduler.Services\ExamScheduler.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="https://www.schemastore.org/appveyor.json" /></VisualStudio></ProjectExtensions>
 
 </Project>
