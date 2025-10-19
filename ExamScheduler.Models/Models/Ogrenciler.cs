@@ -23,7 +23,7 @@ public partial class Ogrenciler
     [Column("BolumID")]
     public int BolumId { get; set; }
 
-    public byte Sinif { get; set; }
+    public string? Sinif { get; set; }
 
     [ForeignKey("BolumId")]
     [InverseProperty("Ogrencilers")]
