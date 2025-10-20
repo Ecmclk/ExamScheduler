@@ -1,0 +1,223 @@
+﻿<UserControl x:Class="ExamScheduler.UI.Ekranlar.SinavProgramiOlustur"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="950"
+             Background="#FAFAFA">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- ÜST BAŞLIK -->
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="📘 Sınav Programı Oluştur"
+                           FontSize="30"
+                           FontWeight="Bold"
+                           Foreground="#2C3E50"
+                           Margin="0,0,0,25"/>
+
+                <!-- KISITLAR KUTUSU -->
+                <Border Background="White"
+                        CornerRadius="12"
+                        Padding="20"
+                        Margin="0,0,0,20"
+                        BorderBrush="#DDE1E7"
+                        BorderThickness="1"
+                        >
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.2"/>
+                    </Border.Effect>
+
+                    <StackPanel>
+                        <TextBlock Text="Ders Seçimi ve Ayarlar"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="#34495E"
+                                   Margin="0,0,0,10"/>
+
+                        <!-- DERS SEÇİMİ -->
+                        <ListBox x:Name="DersListBox" Height="300" Background="#F9FAFB" BorderBrush="#DDE1E7">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="2" Padding="5" Background="White" CornerRadius="6" BorderBrush="#E0E0E0" BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <CheckBox IsChecked="{Binding Secili}"
+                                                      Content="{Binding DersAdi}"
+                                                      FontSize="14"
+                                                      Width="300"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock Text="Süre (dk):"
+                                                       VerticalAlignment="Center"
+                                                       Margin="10,0,5,0"
+                                                       Foreground="#555"/>
+                                            <TextBox Text="{Binding SinavSuresi}"
+                                                     Width="50"
+                                                     Background="#F4F6F8"
+                                                     BorderBrush="#D0D3D8"
+                                                     BorderThickness="1"
+                                                     Padding="2"
+                                                     HorizontalContentAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- TARİH VE AYARLAR -->
+                        <Separator Margin="0,10"/>
+                        <TextBlock Text="📅 Sınav Tarih Aralığı:"
+                                   FontWeight="Bold"
+                                   Foreground="#34495E"
+                                   Margin="0,10,0,5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <DatePicker x:Name="StartDatePicker" Width="150" Margin="0,0,10,0"/>
+                            <TextBlock Text="→" VerticalAlignment="Center" Foreground="#777"/>
+                            <DatePicker x:Name="EndDatePicker" Width="150" Margin="10,0,0,0"/>
+                        </StackPanel>
+
+                        <CheckBox x:Name="CumartesiPazarKisit"
+                                  Content="Cumartesi ve Pazar sınav yapılmasın"
+                                  Margin="0,10,0,0"/>
+
+                        <TextBlock Text="Hariç Tutulacak Günler:" 
+                                   FontWeight="Bold"
+                                   Foreground="#34495E"
+                                   Margin="0,10,0,5"/>
+                        <Calendar x:Name="HaricTutulacakTarihlerCalendar"
+                                  SelectionMode="MultipleRange"
+                                  Width="220"
+                                  Height="160"
+                                  HorizontalAlignment="Left"
+                                  Margin="0">
+                            <Calendar.Template>
+                                <ControlTemplate TargetType="Calendar">
+                                    <Border BorderBrush="#2C3E50"
+                                            BorderThickness="1"
+                                            Background="White"
+                                            Margin="0">
+                                        <Grid Margin="0"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center">
+                                            <CalendarItem x:Name="PART_CalendarItem"
+                                                          Margin="0"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Calendar.Template>
+                        </Calendar>
+
+
+
+
+
+
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <TextBlock Text="Sınav Türü:" 
+                                       FontWeight="Bold" 
+                                       Foreground="#34495E"
+                                       VerticalAlignment="Center"
+                                       Width="120"/> <!-- sabit genişlik hizalamayı sağlar -->
+
+                            <ComboBox x:Name="SinavTuruComboBox"
+                                      Width="200"
+                                      HorizontalAlignment="Left">
+                                <ComboBoxItem Content="Vize"/>
+                                <ComboBoxItem Content="Final"/>
+                                <ComboBoxItem Content="Bütünleme"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <TextBlock Text="Bekleme Süresi (dk):"
+                                   FontWeight="Bold"
+                                   Foreground="#34495E"
+                                   Margin="0,10,0,5"/>
+                        <TextBox x:Name="BeklemeSuresiTextBox"
+                                 Text="15"
+                                 Width="60"
+                                 Background="#F4F6F8"
+                                 BorderBrush="#D0D3D8"
+                                 BorderThickness="1"
+                                 Padding="3"
+                                 HorizontalContentAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- BUTON -->
+                <Button Content="📅 Programı Oluştur"
+                        Padding="15,8"
+                        Width="220"
+                        FontWeight="SemiBold"
+                        FontSize="14"
+                        Background="#3498DB"
+                        Foreground="White"
+                        BorderBrush="#2980B9"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        HorizontalAlignment="Left"
+                        Margin="0,0,0,10"
+                        Click="ProgramiOlusturButton_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <!-- Border'a isim veriyoruz -->
+                            <Border x:Name="buttonBorder"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    Padding="{TemplateBinding Padding}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Trigger'larda TargetName belirtilmeli -->
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="buttonBorder" Property="Background" Value="#2980B9"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="buttonBorder" Property="Opacity" Value="0.85"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="buttonBorder" Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+            </StackPanel>
+
+            <!-- DATAGRID -->
+            <Border Grid.Row="1"
+                    CornerRadius="10"
+                    BorderBrush="#DDE1E7"
+                    BorderThickness="1"
+                    Background="White"
+                    Padding="10">
+                <DataGrid x:Name="SinavProgramiDataGrid"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          RowBackground="#F9FAFB"
+                          AlternatingRowBackground="#EEF2F6"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          BorderThickness="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ders" Binding="{Binding DersAdi}" Width="*" />
+                        <DataGridTextColumn Header="Tarih" Binding="{Binding Tarih}" Width="150" />
+                        <DataGridTextColumn Header="Saat" Binding="{Binding Saat}" Width="100" />
+                        <DataGridTextColumn Header="Salon" Binding="{Binding Salon}" Width="150" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

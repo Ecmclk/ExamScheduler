@@ -35,6 +35,9 @@
                         Style="{StaticResource NavButtonStyle}"/>
                 <Button Content="Derslik Yönetimi" Click="DerslikButton_Click"
                         Style="{StaticResource NavButtonStyle}"/>
+                <Button x:Name="SinavProgramiButton" Content="Sınav Programı Oluştur" 
+                        Click="SinavProgrami_Click" Visibility="Collapsed"
+                        Style="{StaticResource NavButtonStyle}"/>
 
                 <Separator Margin="10,20"/>
                 <Button Content="Çıkış Yap" Click="CikisButton_Click"

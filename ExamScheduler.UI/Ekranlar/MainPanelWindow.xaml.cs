@@ -1,17 +1,26 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using ExamScheduler.Data;
+using ExamScheduler.Services;
 using ExamScheduler.UI.Ekranlar;
 
 namespace ExamScheduler.UI
 {
     public partial class MainPanelWindow : Window
     {
+        private readonly DersService _dersService;
         public MainPanelWindow()
         {
             InitializeComponent();
-
+           
+            var dbContext = new AppDbContext();
+            _dersService = new DersService(dbContext);
+            
             // Uygulama açıldığında varsayılan olarak Kontrol Paneli gelsin
             LoadUserControl(new KontrolPaneli());
+
+            // 🔽 Eğer veriler önceden varsa sınav butonunu hemen kontrol et
+            CheckIfExamMenuShouldBeVisible();
         }
 
         /// <summary>
@@ -62,6 +71,24 @@ namespace ExamScheduler.UI
                 new MainWindow().Show();
                 this.Close();
             }
+        }
+        
+        public async Task  CheckIfExamMenuShouldBeVisible()
+        {
+            var dersler = await _dersService.GetAllDerslerAsync();
+            bool hasDers = dersler.Any();
+
+            // Örnek: öğrenci kontrolü için OgrenciService kullanabilirsin
+            bool hasOgrenci = true; // veya servis ile kontrol et
+
+            SinavProgramiButton.Visibility = (hasDers && hasOgrenci)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private void SinavProgrami_Click(object sender, RoutedEventArgs e)
+        {
+            MainContentControl.Content = new SinavProgramiOlustur(_dersService);
         }
     }
 }

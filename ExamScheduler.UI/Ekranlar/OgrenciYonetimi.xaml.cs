@@ -139,6 +139,9 @@ namespace ExamScheduler.UI.Ekranlar
                     MessageBoxButton.OK,
                     MessageBoxImage.Information
                 );
+                
+                ((MainPanelWindow)Application.Current.MainWindow)?.CheckIfExamMenuShouldBeVisible();
+
             }
             else
             {

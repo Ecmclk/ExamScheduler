@@ -3,48 +3,101 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:ExamScheduler.UI.Ekranlar"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="950">
 
     <UserControl.Resources>
+        <!-- Column Header Style -->
         <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#718096"/>
-            <Setter Property="Padding" Value="10,12"/>
+            <Setter Property="Background" Value="#F7FAFC"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#1A202C"/>
+            <Setter Property="Padding" Value="12,8"/>
             <Setter Property="BorderThickness" Value="0,0,0,2"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderBrush" Value="#CBD5E0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
         </Style>
+
+        <!-- Cell Style -->
         <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
-            <Setter Property="Padding" Value="10,12"/>
+            <Setter Property="Padding" Value="10,6"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#2D3748"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#EDF2F7"/>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#3182CE"/>
+                    <Setter Property="Foreground" Value="White"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+
+        <!-- Row Style -->
+        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E2E8F0"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#3182CE"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Modern Button Style -->
+        <Style TargetType="Button" x:Key="ModernButton">
+            <Setter Property="Background" Value="#3182CE"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Margin" Value="8,4,0,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12,4"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2B6CB0"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#2C5282"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel>
+        <StackPanel Margin="20">
             <TextBlock Text="Bölüm Yönetimi" FontSize="28" FontWeight="Bold" Margin="0,0,0,25"/>
 
             <!-- Yeni bölüm ekleme -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                 <Grid>
-                    <!-- TextBox -->
                     <TextBox x:Name="BolumAdTextBox"
                              Width="300" Height="35"
                              Padding="8"
                              TextChanged="BolumAdTextBox_TextChanged"/>
-
-                    <!-- Placeholder (üstüne gelen TextBlock) -->
                     <TextBlock x:Name="BolumAdPlaceholder"
                                Text="Yeni Bölüm Adı Girin..."
                                Margin="12,0,0,0"
@@ -53,30 +106,59 @@
                                IsHitTestVisible="False"
                                Visibility="Visible"/>
                 </Grid>
-
                 <Button Content="Ekle"
                         Margin="10,0,0,0"
                         Padding="15,6"
+                        Style="{StaticResource ModernButton}"
                         Click="BolumEkleButton_Click"/>
             </StackPanel>
 
             <!-- Bölüm listesi -->
             <TextBlock Text="Sistemdeki Bölümler" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
-            <DataGrid x:Name="BolumlerDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
-                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                      Background="White" BorderThickness="1" BorderBrush="#E2E8F0"
+            <DataGrid x:Name="BolumlerDataGrid"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      Background="White"
+                      BorderThickness="1"
+                      BorderBrush="#CBD5E0"
                       RowStyle="{StaticResource DataGridRowStyle}"
                       CellStyle="{StaticResource DataGridCellStyle}"
-                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
+                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                      AlternatingRowBackground="#F7FAFC"
+                      ColumnWidth="*"
+                      MinRowHeight="30">
+
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding BolumID}" Width="80"/>
-                    <DataGridTextColumn Header="Bölüm Adı" Binding="{Binding BolumAd}" Width="*"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding BolumId}" Width="80">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="6,4"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Bölüm Adı" Binding="{Binding BolumAd}" Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="6,4"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
 
                     <DataGridTemplateColumn Header="İşlemler" Width="100">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Sil" Background="#E53E3E" Foreground="White"
-                                        FontWeight="SemiBold" Click="SilBolumButton_Click"/>
+                                <Button Content="Sil"
+                                        Background="#E53E3E"
+                                        Foreground="White"
+                                        FontWeight="SemiBold"
+                                        Style="{StaticResource ModernButton}"
+                                        Click="SilBolumButton_Click"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -45,6 +45,7 @@ namespace ExamScheduler.Services
         public async Task<List<Dersler>> GetAllDerslerAsync()
         {
             return await _dbContext.Dersler
+                .Include(o => o.Bolum) 
                 .Include(d => d.OgrenciDersler)
                 .ThenInclude(od => od.Ogrenci)
                 .ToListAsync();

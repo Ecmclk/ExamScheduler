@@ -5,6 +5,7 @@ using ExamScheduler.Services;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace ExamScheduler.UI.Ekranlar
 {
@@ -97,7 +98,12 @@ namespace ExamScheduler.UI.Ekranlar
                 MessageBox.Show("Bu e-posta adresi zaten sistemde kayıtlı.", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+      
+
+        
     }
+    
+    
 
     /// <summary>
     /// DataGrid için sade görünümlü kullanıcı modeli.

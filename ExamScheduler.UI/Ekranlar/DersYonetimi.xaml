@@ -5,89 +5,223 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="700" d:DesignWidth="950">
+    
     <UserControl.Resources>
-        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="Transparent"/>
+        <!-- DataGrid Styles -->
+          <!-- Column Header Style -->
+    <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="#F7FAFC"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="#1A202C"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="BorderThickness" Value="0,0,0,2"/>
+        <Setter Property="BorderBrush" Value="#CBD5E0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Cell Style -->
+    <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="#2D3748"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#3182CE"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Row Style -->
+    <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#E2E8F0"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#3182CE"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+        <!-- Modern Button Style -->
+        <Style TargetType="Button" x:Key="ModernButton">
+            <Setter Property="Background" Value="#3182CE"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#718096"/>
-            <Setter Property="Padding" Value="10,12"/>
-            <Setter Property="BorderThickness" Value="0,0,0,2"/>
-            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="Margin" Value="8,4,0,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12,4"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2B6CB0"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#2C5282"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
-        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
-            <Setter Property="Padding" Value="10,12"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
-            <Setter Property="BorderThickness" Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#EDF2F7"/>
-                </Trigger>
-            </Style.Triggers>
+
+
+        <!-- Modern ComboBox Style -->
+        <Style TargetType="ComboBox" x:Key="ModernComboBox">
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="BorderBrush" Value="#CBD5E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#2D3748"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel>
+        <StackPanel Margin="20">
             <TextBlock Text="Ders Yönetimi" FontSize="28" FontWeight="Bold" Margin="0,0,0,25"/>
 
             <!-- Excel Yükleme Alanı -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                 <TextBlock Text="Excel'den Ders Listesi Yükle:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0"/>
-                <Button Content="Excel Dosyası Seç ve Yükle" Padding="10,6" Click="ExcelYukleButton_Click"/>
+                <Button Content="Excel Dosyası Seç ve Yükle" Style="{StaticResource ModernButton}" Click="ExcelYukleButton_Click"/>
             </StackPanel>
 
             <!-- Bölüme göre filtreleme -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
                 <TextBlock Text="Bölüme Göre Filtrele:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,10,0"/>
-                <ComboBox x:Name="BolumFiltreComboBox" Width="250" Padding="8" VerticalContentAlignment="Center"
+                <ComboBox x:Name="BolumFiltreComboBox" Width="250" Style="{StaticResource ModernComboBox}"
                           SelectionChanged="BolumFiltreComboBox_SelectionChanged"/>
-                <Button x:Name="FiltreyiTemizleButton" Content="Filtreyi Temizle" Margin="10,0,0,0" Padding="10,5"
+                <Button x:Name="FiltreyiTemizleButton" Content="Filtreyi Temizle" Style="{StaticResource ModernButton}" Margin="10,0,0,0"
                         Click="FiltreyiTemizleButton_Click"/>
             </StackPanel>
 
             <!-- Ders Listesi -->
             <TextBlock Text="Sistemdeki Dersler" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
-            <DataGrid x:Name="DerslerDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
-                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                      Background="White" BorderThickness="1" BorderBrush="#E2E8F0"
+            <DataGrid x:Name="DerslerDataGrid"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      Background="White"
+                      BorderThickness="1"
+                      BorderBrush="#CBD5E0"
                       RowStyle="{StaticResource DataGridRowStyle}"
-                      CellStyle="{StaticResource DataGridCellStyle}"
                       ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                      AlternatingRowBackground="#F7FAFC"
                       SelectionMode="Single"
-                      SelectedCellsChanged="DerslerDataGrid_SelectedCellsChanged">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding DersId}" Width="60"/>
-                    <DataGridTextColumn Header="Ders Kodu" Binding="{Binding DersKodu}" Width="150"/>
-                    <DataGridTextColumn Header="Ders Adı" Binding="{Binding DersAdi}" Width="*"/>
-                    <DataGridTextColumn Header="Öğretim Görevlisi" Binding="{Binding OgretimGorevlisi}" Width="200"/>
-                    <DataGridTextColumn Header="Bölüm" Binding="{Binding Bolum.BolumAd}" Width="200"/>
-                    <DataGridTemplateColumn Header="İşlemler" Width="100">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="Sil" Background="#E53E3E" Foreground="White" FontWeight="SemiBold"
-                                        Click="SilDersButton_Click"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+                      SelectedCellsChanged="DerslerDataGrid_SelectedCellsChanged"
+                      HorizontalScrollBarVisibility="Auto"
+                      ColumnWidth="*"
+                      MinRowHeight="30">
+
+
+    <DataGrid.Columns>
+        <DataGridTextColumn Header="ID" Binding="{Binding DersId}" Width="60"/>
+        <DataGridTextColumn Header="Ders Kodu" Binding="{Binding DersKodu}" Width="150"/>
+        <DataGridTextColumn Header="Ders Adı" Binding="{Binding DersAdi}" Width="*">
+            <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="Padding" Value="6,4"/>
+                </Style>
+            </DataGridTextColumn.ElementStyle>
+        </DataGridTextColumn>
+        <DataGridTextColumn Header="Öğretim Görevlisi" Binding="{Binding OgretimGorevlisi}" Width="*">
+            <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="Padding" Value="6,4"/>
+                </Style>
+            </DataGridTextColumn.ElementStyle>
+        </DataGridTextColumn>
+        <DataGridTextColumn Header="Bölüm" Binding="{Binding Bolum.BolumAd}" Width="*">
+            <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="Padding" Value="6,4"/>
+                </Style>
+            </DataGridTextColumn.ElementStyle>
+        </DataGridTextColumn>
+        <DataGridTemplateColumn Header="İşlemler" Width="100">
+            <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                    <Button Content="Sil" Background="#E53E3E" Foreground="White" FontWeight="SemiBold"
+                            Style="{StaticResource ModernButton}" Click="SilDersButton_Click"/>
+                </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+    </DataGrid.Columns>
+</DataGrid>
+
 
             <!-- Dersi Alan Öğrenciler -->
             <TextBlock Text="Dersi Alan Öğrenciler" FontSize="18" FontWeight="SemiBold" Margin="0,20,0,15"/>
-            <DataGrid x:Name="OgrencilerDataGrid" AutoGenerateColumns="False" CanUserAddRows="False"
-                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                      Background="White" BorderThickness="1" BorderBrush="#E2E8F0"
+
+            <DataGrid x:Name="OgrencilerDataGrid"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      Background="White"
+                      BorderThickness="1"
+                      BorderBrush="#CBD5E0"
                       RowStyle="{StaticResource DataGridRowStyle}"
-                      CellStyle="{StaticResource DataGridCellStyle}"
-                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}">
+                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                      AlternatingRowBackground="#F7FAFC"
+                      SelectionMode="Single"
+                      HorizontalScrollBarVisibility="Auto"
+                      ColumnWidth="*"
+                      MinRowHeight="30">
+
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Öğrenci No" Binding="{Binding OgrenciNo}" Width="150"/>
-                    <DataGridTextColumn Header="Ad - Soyad" Binding="{Binding AdSoyad}" Width="*"/>
+                    <DataGridTextColumn Header="Öğrenci No"
+                                        Binding="{Binding OgrenciNo}"
+                                        Width="150"/>
+        
+                    <DataGridTextColumn Header="Ad - Soyad"
+                                        Binding="{Binding AdSoyad}"
+                                        Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Padding" Value="6,4"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
+
         </StackPanel>
     </ScrollViewer>
 </UserControl>

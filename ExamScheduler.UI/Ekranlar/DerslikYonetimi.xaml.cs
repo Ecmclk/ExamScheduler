@@ -107,6 +107,8 @@ namespace ExamScheduler.UI.Ekranlar
             LoadDerslikler();
             ClearForm();
 
+          
+
             MessageBox.Show("Derslik başarıyla eklendi.", "Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -124,7 +126,7 @@ namespace ExamScheduler.UI.Ekranlar
             _context.Derslikler.Remove(derslikToDelete);
             _context.SaveChanges();
             LoadDerslikler();
-
+            
             MessageBox.Show("Derslik başarıyla silindi.", "Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 

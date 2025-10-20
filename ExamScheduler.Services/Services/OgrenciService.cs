@@ -71,6 +71,7 @@ public class OgrenciService
         public async Task<List<Ogrenciler>> GetAllOgrencilerAsync()
         {
             return await _dbContext.Ogrenciler
+                .Include(o => o.Bolum) // Bölüm bilgisi
                 .Include(o => o.OgrenciDersler)
                 .ThenInclude(od => od.Ders)
                 .ToListAsync();

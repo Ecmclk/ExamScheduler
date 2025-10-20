@@ -138,6 +138,8 @@ namespace ExamScheduler.UI.Ekranlar
                 else
                 {
                     MessageBox.Show("Excel dosyasından dersler başarıyla yüklendi.", "Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ((MainPanelWindow)Application.Current.MainWindow)?.CheckIfExamMenuShouldBeVisible();
+
                 }
 
                 // DataGrid'i güncelle

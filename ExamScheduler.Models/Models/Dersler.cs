@@ -34,6 +34,12 @@ public partial class Dersler
     [ForeignKey("BolumId")]
     [InverseProperty("Derslers")]
     public virtual Bolumler Bolum { get; set; } = null!;
+    
+    [NotMapped] 
+    public bool Secili { get; set; } = true; 
+    
+    [NotMapped] 
+    public int SinavSuresi { get; set; } = 75; 
 
     [InverseProperty("Ders")]
     public virtual ICollection<OgrenciDersler> OgrenciDersler { get; set; } = new List<OgrenciDersler>();

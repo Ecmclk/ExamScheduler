@@ -44,9 +44,11 @@ namespace ExamScheduler.UI
             }
 
             // Başarılı giriş
-            MainPanelWindow panel = new MainPanelWindow();
+            var panel = new MainPanelWindow();
+            Application.Current.MainWindow = panel; // 🔽 Burası çok önemli
             panel.Show();
             this.Close();
+
         }
         
         
@@ -72,6 +74,7 @@ namespace ExamScheduler.UI
             }
         }
 
+        
 
     }
 }
