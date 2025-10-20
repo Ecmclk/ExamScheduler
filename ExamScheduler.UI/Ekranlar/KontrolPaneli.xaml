@@ -6,6 +6,40 @@
              xmlns:local="clr-namespace:ExamScheduler.UI.Ekranlar"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="950">
+    <UserControl.Resources>
+        <!-- Modern Button Style (DerslikYönetimi’nden alındı) -->
+        <Style TargetType="Button" x:Key="ModernButton">
+            <Setter Property="Background" Value="#3182CE"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Margin" Value="8,4,0,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12,4"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2B6CB0"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#2C5282"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    
     <Grid Background="#F7FAFC">
         <StackPanel Margin="40">
             <TextBlock Text="Kontrol Paneli" FontSize="28" FontWeight="Bold" Margin="0,0,0,30"/>
@@ -47,12 +81,13 @@
                 </Border>
             </UniformGrid>
 
+            
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
-                <Button Content="Bölüm Yönetimi" Padding="15,8" Width="180" Margin="10" Click="BolumButton_Click"/>
-                <Button Content="Ders Yönetimi" Padding="15,8" Width="180" Margin="10" Click="DersButton_Click"/>
-                <Button Content="Öğrenci Yönetimi" Padding="15,8" Width="180" Margin="10" Click="OgrenciButton_Click"/>
-                <Button Content="Kullanıcı Yönetimi" Padding="15,8" Width="180" Margin="10" Click="KullaniciButton_Click"/>
-                <Button Content="Derslik Yönetimi" Padding="15,8" Width="180" Margin="10" Click="DerslikButton_Click"/>
+                <Button Content="Bölüm Yönetimi" Padding="15,8" Width="180" Margin="10" Click="BolumButton_Click" Style="{StaticResource ModernButton}"/>
+                <Button Content="Ders Yönetimi" Padding="15,8" Width="180" Margin="10" Click="DersButton_Click" Style="{StaticResource ModernButton}"/>
+                <Button Content="Öğrenci Yönetimi" Padding="15,8" Width="180" Margin="10" Click="OgrenciButton_Click" Style="{StaticResource ModernButton}"/>
+                <Button Content="Kullanıcı Yönetimi" Padding="15,8" Width="180" Margin="10" Click="KullaniciButton_Click" Style="{StaticResource ModernButton}"/>
+                <Button Content="Derslik Yönetimi" Padding="15,8" Width="180" Margin="10" Click="DerslikButton_Click" Style="{StaticResource ModernButton}"/>
             </StackPanel>
         </StackPanel>
     </Grid>
