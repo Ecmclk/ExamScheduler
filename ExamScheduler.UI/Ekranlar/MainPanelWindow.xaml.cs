@@ -9,18 +9,25 @@ namespace ExamScheduler.UI
     public partial class MainPanelWindow : Window
     {
         private readonly DersService _dersService;
+        private readonly OgrenciService _ogrenciService;
+        private readonly AppDbContext _context;
         public MainPanelWindow()
         {
             InitializeComponent();
-           
-            var dbContext = new AppDbContext();
-            _dersService = new DersService(dbContext);
-            
-            // Uygulama açıldığında varsayılan olarak Kontrol Paneli gelsin
+
+            // ✅ Context'i burada başlat
+            _context = new AppDbContext();
+
+            // ✅ Servisleri context ile başlat
+            _dersService = new DersService(_context);
+            _ogrenciService = new OgrenciService(_context);
+
+            // Varsayılan olarak kontrol paneli gelsin
             LoadUserControl(new KontrolPaneli());
 
-            // 🔽 Eğer veriler önceden varsa sınav butonunu hemen kontrol et
-            CheckIfExamMenuShouldBeVisible();
+            // Menü kontrolü
+            _ = CheckIfExamMenuShouldBeVisible();
+            
         }
 
         /// <summary>
@@ -88,7 +95,7 @@ namespace ExamScheduler.UI
 
         private void SinavProgrami_Click(object sender, RoutedEventArgs e)
         {
-            MainContentControl.Content = new SinavProgramiOlustur(_dersService);
+            LoadUserControl(new SinavProgramiOlustur(_context));
         }
     }
 }

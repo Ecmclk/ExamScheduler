@@ -7,47 +7,148 @@
         mc:Ignorable="d"
         Title="Sınav Planlama Sistemi" Height="720" Width="1200"
         WindowStartupLocation="CenterScreen"
-        Background="#F7FAFC">
+        Background="#F5F5F7">
+
+    <Window.Resources>
+        <!-- Modern Nav Button Style -->
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="Margin" Value="10,2"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#374151"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Logout Button Style -->
+        <Style x:Key="LogoutButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#EF4444"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="Margin" Value="10,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#DC2626"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
     <Grid>
-        <!-- Sol Menü -->
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="260"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Background="#2B6CB0" Grid.Column="0">
-            <StackPanel>
-                <TextBlock Text="Exam Scheduler"
-                           FontSize="20" FontWeight="Bold"
-                           Foreground="White" HorizontalAlignment="Center"
-                           Margin="0,20,0,40"/>
+        <!-- Modern Sol Menü - Dark Theme -->
+        <Border Grid.Column="0">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#1F2937" Offset="0"/>
+                    <GradientStop Color="#111827" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <Button Content="Kontrol Paneli" Click="KontrolPaneliButton_Click"
-                        Style="{StaticResource NavButtonStyle}"/>
-                <Button Content="Bölüm Yönetimi" Click="BolumButton_Click"
-                        Style="{StaticResource NavButtonStyle}"/>
-                <Button Content="Ders Yönetimi" Click="DersButton_Click"
-                        Style="{StaticResource NavButtonStyle}"/>
-                <Button Content="Öğrenci Yönetimi" Click="OgrenciButton_Click"
-                        Style="{StaticResource NavButtonStyle}"/>
-                <Button Content="Kullanıcı Yönetimi" Click="KullaniciButton_Click"
-                        Style="{StaticResource NavButtonStyle}"/>
-                <Button Content="Derslik Yönetimi" Click="DerslikButton_Click"
-                        Style="{StaticResource NavButtonStyle}"/>
-                <Button x:Name="SinavProgramiButton" Content="Sınav Programı Oluştur" 
-                        Click="SinavProgrami_Click" Visibility="Collapsed"
-                        Style="{StaticResource NavButtonStyle}"/>
+                <!-- Logo ve Başlık -->
+                <StackPanel Grid.Row="0" Margin="0,30,0,40">
+                   
+                    <TextBlock Text="Exam Scheduler"
+                               FontSize="22" FontWeight="Bold"
+                               Foreground="White" 
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"/>
+                    <TextBlock Text="Yönetim Paneli"
+                               FontSize="12" 
+                               Foreground="#9CA3AF" 
+                               HorizontalAlignment="Center"
+                               Margin="0,5,0,0"/>
+                </StackPanel>
 
-                <Separator Margin="10,20"/>
-                <Button Content="Çıkış Yap" Click="CikisButton_Click"
-                        Style="{StaticResource LogoutButtonStyle}"/>
-            </StackPanel>
+                <!-- Menü Butonları -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Button Content="📊 Kontrol Paneli" Click="KontrolPaneliButton_Click"
+                                Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="🏫 Bölüm Yönetimi" Click="BolumButton_Click"
+                                Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="📚 Ders Yönetimi" Click="DersButton_Click"
+                                Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="👥 Öğrenci Yönetimi" Click="OgrenciButton_Click"
+                                Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="🔐 Kullanıcı Yönetimi" Click="KullaniciButton_Click"
+                                Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="🚪 Derslik Yönetimi" Click="DerslikButton_Click"
+                                Style="{StaticResource NavButtonStyle}"/>
+                        <Button x:Name="SinavProgramiButton" 
+                                Content="📅 Sınav Programı Oluştur" 
+                                Click="SinavProgrami_Click" 
+                                Visibility="Collapsed"
+                                Style="{StaticResource NavButtonStyle}"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Alt Kısım -->
+                <StackPanel Grid.Row="2" Margin="0,20,0,30">
+                    <Separator Background="#374151" Margin="20,0,20,20" Opacity="0.5"/>
+                    <Button Content="🚪 Çıkış Yap" Click="CikisButton_Click"
+                            Style="{StaticResource LogoutButtonStyle}"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- İçerik Alanı -->
-        <Border Grid.Column="1" Background="#F7FAFC" Padding="30">
-            <ContentControl x:Name="MainContentControl"/>
+        <Border Grid.Column="1" Background="#F5F5F7" Padding="30">
+            <Border Background="White" CornerRadius="12" Padding="25">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="25" 
+                                    ShadowDepth="0" Opacity="0.06"/>
+                </Border.Effect>
+                <ContentControl x:Name="MainContentControl"/>
+            </Border>
         </Border>
     </Grid>
 </Window>

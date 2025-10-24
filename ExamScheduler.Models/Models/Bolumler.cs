@@ -31,4 +31,5 @@ public partial class Bolumler
 
     [InverseProperty("Bolum")]
     public virtual ICollection<Ogrenciler> Ogrencilers { get; set; } = new List<Ogrenciler>();
+    public override string ToString() => BolumAd;
 }

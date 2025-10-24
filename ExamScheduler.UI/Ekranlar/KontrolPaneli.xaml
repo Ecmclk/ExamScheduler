@@ -6,89 +6,280 @@
              xmlns:local="clr-namespace:ExamScheduler.UI.Ekranlar"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="950">
+    
     <UserControl.Resources>
-        <!-- Modern Button Style (DerslikYönetimi’nden alındı) -->
-        <Style TargetType="Button" x:Key="ModernButton">
-            <Setter Property="Background" Value="#3182CE"/>
-            <Setter Property="Foreground" Value="White"/>
+        <!-- Stat Card Style -->
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="25"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#10B981" BlurRadius="20" 
+                                            ShadowDepth="0" Opacity="0.15"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Action Button Style -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#374151"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="MinWidth" Value="100"/>
-            <Setter Property="Margin" Value="8,4,0,4"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Width" Value="170"/>
+            <Setter Property="Margin" Value="8"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                                CornerRadius="6"
+                                CornerRadius="10"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12,4"/>
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#2B6CB0"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#2C5282"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#10B981"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderBrush" Value="#10B981"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
     
-    <Grid Background="#F7FAFC">
-        <StackPanel Margin="40">
-            <TextBlock Text="Kontrol Paneli" FontSize="28" FontWeight="Bold" Margin="0,0,0,30"/>
-
-            <UniformGrid Columns="3" Rows="2" Margin="0,0,0,30" HorizontalAlignment="Stretch">
-                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
+    <Grid Background="#F5F5F7">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="30">
+                <!-- Header -->
+                <Grid Margin="0,0,0,35">
                     <StackPanel>
-                        <TextBlock Text="Toplam Bölüm" FontSize="16" Foreground="#4A5568"/>
-                        <TextBlock x:Name="BolumSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
+                        <TextBlock Text="Kontrol Paneli 📊" 
+                                   FontSize="32" 
+                                   FontWeight="Bold" 
+                                   Foreground="#1F2937"/>
+                        <TextBlock Text="Sistem istatistiklerine hızlı bakış" 
+                                   FontSize="14" 
+                                   Foreground="#6B7280"
+                                   Margin="0,5,0,0"/>
                     </StackPanel>
-                </Border>
+                </Grid>
 
-                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Toplam Ders" FontSize="16" Foreground="#4A5568"/>
-                        <TextBlock x:Name="DersSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
-                    </StackPanel>
-                </Border>
+                <!-- Statistics Cards -->
+                <UniformGrid Columns="3" Rows="2" Margin="0,0,0,30">
+                    <!-- Bölüm Card -->
+                    <Border Style="{StaticResource StatCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                                <Border Background="#DBEAFE" 
+                                        CornerRadius="8" 
+                                        Width="40" Height="40"
+                                        Margin="0,0,15,0">
+                                    <TextBlock Text="🏫" 
+                                               FontSize="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Toplam Bölüm" 
+                                           FontSize="15" 
+                                           Foreground="#6B7280"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Medium"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Row="1">
+                                <TextBlock x:Name="BolumSayisiText" 
+                                           Text="0" 
+                                           FontSize="40" 
+                                           FontWeight="Bold" 
+                                           Foreground="#1F2937"/>
+                                <TextBlock Text="Aktif bölüm sayısı" 
+                                           FontSize="12" 
+                                           Foreground="#9CA3AF"
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
-                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Toplam Öğrenci" FontSize="16" Foreground="#4A5568"/>
-                        <TextBlock x:Name="OgrenciSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
-                    </StackPanel>
-                </Border>
+                    <!-- Ders Card -->
+                    <Border Style="{StaticResource StatCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                                <Border Background="#D1FAE5" 
+                                        CornerRadius="8" 
+                                        Width="40" Height="40"
+                                        Margin="0,0,15,0">
+                                    <TextBlock Text="📚" 
+                                               FontSize="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Toplam Ders" 
+                                           FontSize="15" 
+                                           Foreground="#6B7280"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Medium"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Row="1">
+                                <TextBlock x:Name="DersSayisiText" 
+                                           Text="0" 
+                                           FontSize="40" 
+                                           FontWeight="Bold" 
+                                           Foreground="#1F2937"/>
+                                <TextBlock Text="Kayıtlı ders sayısı" 
+                                           FontSize="12" 
+                                           Foreground="#9CA3AF"
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
-                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Toplam Kullanıcı" FontSize="16" Foreground="#4A5568"/>
-                        <TextBlock x:Name="KullaniciSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
-                    </StackPanel>
-                </Border>
+                    <!-- Öğrenci Card -->
+                    <Border Style="{StaticResource StatCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                                <Border Background="#FEF3C7" 
+                                        CornerRadius="8" 
+                                        Width="40" Height="40"
+                                        Margin="0,0,15,0">
+                                    <TextBlock Text="👥" 
+                                               FontSize="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Toplam Öğrenci" 
+                                           FontSize="15" 
+                                           Foreground="#6B7280"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Medium"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Row="1">
+                                <TextBlock x:Name="OgrenciSayisiText" 
+                                           Text="0" 
+                                           FontSize="40" 
+                                           FontWeight="Bold" 
+                                           Foreground="#1F2937"/>
+                                <TextBlock Text="Kayıtlı öğrenci sayısı" 
+                                           FontSize="12" 
+                                           Foreground="#9CA3AF"
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
-                <Border Background="White" CornerRadius="12" Margin="10" Padding="20" BorderBrush="#E2E8F0" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Toplam Derslik" FontSize="16" Foreground="#4A5568"/>
-                        <TextBlock x:Name="DerslikSayisiText" Text="0" FontSize="36" FontWeight="Bold" Foreground="#2B6CB0"/>
-                    </StackPanel>
-                </Border>
-            </UniformGrid>
+                    <!-- Kullanıcı Card -->
+                    <Border Style="{StaticResource StatCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                                <Border Background="#E0E7FF" 
+                                        CornerRadius="8" 
+                                        Width="40" Height="40"
+                                        Margin="0,0,15,0">
+                                    <TextBlock Text="🔐" 
+                                               FontSize="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Toplam Kullanıcı" 
+                                           FontSize="15" 
+                                           Foreground="#6B7280"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Medium"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Row="1">
+                                <TextBlock x:Name="KullaniciSayisiText" 
+                                           Text="0" 
+                                           FontSize="40" 
+                                           FontWeight="Bold" 
+                                           Foreground="#1F2937"/>
+                                <TextBlock Text="Aktif kullanıcı sayısı" 
+                                           FontSize="12" 
+                                           Foreground="#9CA3AF"
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
-            
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
-                <Button Content="Bölüm Yönetimi" Padding="15,8" Width="180" Margin="10" Click="BolumButton_Click" Style="{StaticResource ModernButton}"/>
-                <Button Content="Ders Yönetimi" Padding="15,8" Width="180" Margin="10" Click="DersButton_Click" Style="{StaticResource ModernButton}"/>
-                <Button Content="Öğrenci Yönetimi" Padding="15,8" Width="180" Margin="10" Click="OgrenciButton_Click" Style="{StaticResource ModernButton}"/>
-                <Button Content="Kullanıcı Yönetimi" Padding="15,8" Width="180" Margin="10" Click="KullaniciButton_Click" Style="{StaticResource ModernButton}"/>
-                <Button Content="Derslik Yönetimi" Padding="15,8" Width="180" Margin="10" Click="DerslikButton_Click" Style="{StaticResource ModernButton}"/>
+                    <!-- Derslik Card -->
+                    <Border Style="{StaticResource StatCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                                <Border Background="#FCE7F3" 
+                                        CornerRadius="8" 
+                                        Width="40" Height="40"
+                                        Margin="0,0,15,0">
+                                    <TextBlock Text="🚪" 
+                                               FontSize="20"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Toplam Derslik" 
+                                           FontSize="15" 
+                                           Foreground="#6B7280"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Medium"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Row="1">
+                                <TextBlock x:Name="DerslikSayisiText" 
+                                           Text="0" 
+                                           FontSize="40" 
+                                           FontWeight="Bold" 
+                                           Foreground="#1F2937"/>
+                                <TextBlock Text="Kullanılabilir derslik" 
+                                           FontSize="12" 
+                                           Foreground="#9CA3AF"
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </UniformGrid>
+
+               
             </StackPanel>
-        </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

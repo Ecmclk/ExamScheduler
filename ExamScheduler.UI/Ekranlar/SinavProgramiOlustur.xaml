@@ -4,220 +4,552 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             d:DesignHeight="700" d:DesignWidth="950"
-             Background="#FAFAFA">
+             d:DesignHeight="700" d:DesignWidth="950">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+    <UserControl.Resources>
+        <!-- Modern Card Style -->
+        <Style x:Key="ModernCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="25"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#10B981" BlurRadius="15" 
+                                            ShadowDepth="0" Opacity="0.1"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
-            <!-- ÜST BAŞLIK -->
-            <StackPanel Grid.Row="0">
-                <TextBlock Text="📘 Sınav Programı Oluştur"
-                           FontSize="30"
-                           FontWeight="Bold"
-                           Foreground="#2C3E50"
-                           Margin="0,0,0,25"/>
+        <!-- DataGrid Column Header Style -->
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F9FAFB"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="48"/>
+        </Style>
 
-                <!-- KISITLAR KUTUSU -->
-                <Border Background="White"
-                        CornerRadius="12"
-                        Padding="20"
-                        Margin="0,0,0,20"
-                        BorderBrush="#DDE1E7"
-                        BorderThickness="1"
-                        >
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.2"/>
-                    </Border.Effect>
+        <!-- DataGrid Cell Style -->
+        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#ECFDF5"/>
+                    <Setter Property="Foreground" Value="#065F46"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
-                    <StackPanel>
-                        <TextBlock Text="Ders Seçimi ve Ayarlar"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   Foreground="#34495E"
-                                   Margin="0,0,0,10"/>
+        <!-- DataGrid Row Style -->
+        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Height" Value="56"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F9FAFB"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#ECFDF5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
-                        <!-- DERS SEÇİMİ -->
-                        <ListBox x:Name="DersListBox" Height="300" Background="#F9FAFB" BorderBrush="#DDE1E7">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Margin="2" Padding="5" Background="White" CornerRadius="6" BorderBrush="#E0E0E0" BorderThickness="1">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <CheckBox IsChecked="{Binding Secili}"
-                                                      Content="{Binding DersAdi}"
-                                                      FontSize="14"
-                                                      Width="300"
-                                                      VerticalAlignment="Center"/>
-                                            <TextBlock Text="Süre (dk):"
-                                                       VerticalAlignment="Center"
-                                                       Margin="10,0,5,0"
-                                                       Foreground="#555"/>
-                                            <TextBox Text="{Binding SinavSuresi}"
-                                                     Width="50"
-                                                     Background="#F4F6F8"
-                                                     BorderBrush="#D0D3D8"
-                                                     BorderThickness="1"
-                                                     Padding="2"
-                                                     HorizontalContentAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+        <!-- Primary Button Style -->
+        <Style TargetType="Button" x:Key="PrimaryButton">
+            <Setter Property="Background" Value="#10B981"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="MinWidth" Value="180"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="buttonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttonBorder" Property="Background" Value="#059669"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="buttonBorder" Property="Background" Value="#047857"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="buttonBorder" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-                        <!-- TARİH VE AYARLAR -->
-                        <Separator Margin="0,10"/>
-                        <TextBlock Text="📅 Sınav Tarih Aralığı:"
-                                   FontWeight="Bold"
-                                   Foreground="#34495E"
-                                   Margin="0,10,0,5"/>
-                        <StackPanel Orientation="Horizontal">
-                            <DatePicker x:Name="StartDatePicker" Width="150" Margin="0,0,10,0"/>
-                            <TextBlock Text="→" VerticalAlignment="Center" Foreground="#777"/>
-                            <DatePicker x:Name="EndDatePicker" Width="150" Margin="10,0,0,0"/>
-                        </StackPanel>
+        <!-- Secondary Button Style -->
+        <Style TargetType="Button" x:Key="SecondaryButton">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="MinWidth" Value="200"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="buttonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttonBorder" Property="Background" Value="#F9FAFB"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="buttonBorder" Property="Background" Value="#F3F4F6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-                        <CheckBox x:Name="CumartesiPazarKisit"
-                                  Content="Cumartesi ve Pazar sınav yapılmasın"
-                                  Margin="0,10,0,0"/>
-
-                        <TextBlock Text="Hariç Tutulacak Günler:" 
-                                   FontWeight="Bold"
-                                   Foreground="#34495E"
-                                   Margin="0,10,0,5"/>
-                        <Calendar x:Name="HaricTutulacakTarihlerCalendar"
-                                  SelectionMode="MultipleRange"
-                                  Width="220"
-                                  Height="160"
-                                  HorizontalAlignment="Left"
-                                  Margin="0">
-                            <Calendar.Template>
-                                <ControlTemplate TargetType="Calendar">
-                                    <Border BorderBrush="#2C3E50"
+        <!-- Modern ComboBox Style -->
+        <Style TargetType="ComboBox" x:Key="ModernComboBox">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <Grid>
+                                <ToggleButton x:Name="ToggleButton"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Focusable="False"
+                                            IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                            ClickMode="Press">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition Width="20"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ContentPresenter Grid.Column="0"
+                                                        Content="{TemplateBinding SelectionBoxItem}"
+                                                        ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                        ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                        Margin="12,0,0,0"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Left"/>
+                                        <Path Grid.Column="1"
+                                            Data="M 0 0 L 4 4 L 8 0 Z"
+                                            Fill="#6B7280"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                                    </Grid>
+                                </ToggleButton>
+                                <Popup IsOpen="{TemplateBinding IsDropDownOpen}"
+                                    Placement="Bottom"
+                                    AllowsTransparency="True">
+                                    <Border Background="White"
+                                            BorderBrush="#E5E7EB"
                                             BorderThickness="1"
-                                            Background="White"
-                                            Margin="0">
-                                        <Grid Margin="0"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center">
-                                            <CalendarItem x:Name="PART_CalendarItem"
-                                                          Margin="0"
-                                                          HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"/>
-                                        </Grid>
+                                            CornerRadius="10"
+                                            Margin="0,4,0,0">
+                                        <ScrollViewer MaxHeight="200">
+                                            <ItemsPresenter/>
+                                        </ScrollViewer>
                                     </Border>
-                                </ControlTemplate>
-                            </Calendar.Template>
-                        </Calendar>
+                                </Popup>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
+        <!-- Modern TextBox Style -->
+        <Style TargetType="TextBox" x:Key="ModernTextBox">
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                        Margin="10,0"
+                                        VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
+        <!-- Modern DatePicker Style -->
+        <Style TargetType="DatePicker" x:Key="ModernDatePicker">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
 
+        <!-- Modern CheckBox Style -->
+        <Style TargetType="CheckBox" x:Key="ModernCheckBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Margin" Value="0,8,0,8"/>
+        </Style>
+    </UserControl.Resources>
 
+    <Grid Background="#F5F5F7">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="30">
+                <!-- Header -->
+                <Grid Margin="0,0,0,35">
+                    <StackPanel>
+                        <TextBlock Text="Sınav Programı Oluştur 📅" 
+                                   FontSize="32" 
+                                   FontWeight="Bold" 
+                                   Foreground="#1F2937"/>
+                        <TextBlock Text="Otomatik sınav programı oluşturun ve yönetin" 
+                                   FontSize="14" 
+                                   Foreground="#6B7280"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Grid>
 
+                <!-- Bölüm Seçimi Kartı -->
+                <Border Style="{StaticResource ModernCard}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="300"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Text="Bölüm:" 
+                                   Grid.Column="0"
+                                   VerticalAlignment="Center" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="15"
+                                   Foreground="#374151"
+                                   Margin="0,0,15,0"/>
+                        <ComboBox x:Name="BolumComboBox" 
+                                  Grid.Column="1"
+                                  Style="{StaticResource ModernComboBox}"
+                                  DisplayMemberPath="BolumAd"
+                                  SelectionChanged="BolumComboBox_SelectionChanged"/>
+                    </Grid>
+                </Border>
 
+                <!-- Ders Seçimi ve Ayarlar Kartı -->
+                <Border Style="{StaticResource ModernCard}">
+                    <StackPanel>
+                        <TextBlock Text="📚 Ders Seçimi ve Sınav Süreleri" 
+                                   FontSize="18" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#1F2937"
+                                   Margin="0,0,0,15"/>
+                        
+                        <TextBlock Text="Sınava girecek dersleri seçin ve sınav sürelerini belirleyin:" 
+                                   FontSize="13" 
+                                   Foreground="#6B7280"
+                                   Margin="0,0,0,15"/>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <TextBlock Text="Sınav Türü:" 
-                                       FontWeight="Bold" 
-                                       Foreground="#34495E"
+                        <Border Background="#F9FAFB" 
+                                CornerRadius="12" 
+                                BorderBrush="#E5E7EB" 
+                                BorderThickness="1"
+                                MaxHeight="350">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ListBox x:Name="DersListBox" 
+                                         Background="Transparent" 
+                                         BorderThickness="0"
+                                         Padding="8">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="4" 
+                                                    Padding="16,12" 
+                                                    Background="White" 
+                                                    CornerRadius="10" 
+                                                    BorderBrush="#E5E7EB" 
+                                                    BorderThickness="1">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="80"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    
+                                                    <CheckBox Grid.Column="0"
+                                                              IsChecked="{Binding Secili}"
+                                                              Content="{Binding DersAdi}"
+                                                              FontSize="14"
+                                                              FontWeight="Medium"
+                                                              Foreground="#1F2937"
+                                                              VerticalAlignment="Center"/>
+                                                    
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="Süre (dk):"
+                                                               VerticalAlignment="Center"
+                                                               Margin="15,0,10,0"
+                                                               Foreground="#6B7280"
+                                                               FontSize="13"/>
+                                                    
+                                                    <TextBox Grid.Column="2"
+                                                             Text="{Binding SinavSuresi}"
+                                                             Style="{StaticResource ModernTextBox}"
+                                                             Height="36"
+                                                             HorizontalContentAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarih ve Kısıtlamalar Kartı -->
+                <Border Style="{StaticResource ModernCard}">
+                    <StackPanel>
+                        <TextBlock Text="📆 Tarih Aralığı ve Kısıtlamalar" 
+                                   FontSize="18" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#1F2937"
+                                   Margin="0,0,0,20"/>
+
+                        <!-- Tarih Aralığı -->
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0"
+                                       Text="Başlangıç:" 
                                        VerticalAlignment="Center"
-                                       Width="120"/> <!-- sabit genişlik hizalamayı sağlar -->
+                                       FontWeight="Medium"
+                                       Foreground="#374151"
+                                       Margin="0,0,15,0"/>
+                            <DatePicker Grid.Row="0" Grid.Column="1"
+                                        x:Name="StartDatePicker" 
+                                        Width="200"
+                                        HorizontalAlignment="Left"
+                                        Style="{StaticResource ModernDatePicker}"/>
 
+                            <TextBlock Grid.Row="2" Grid.Column="0"
+                                       Text="Bitiş:" 
+                                       VerticalAlignment="Center"
+                                       FontWeight="Medium"
+                                       Foreground="#374151"
+                                       Margin="0,0,15,0"/>
+                            <DatePicker Grid.Row="2" Grid.Column="1"
+                                        x:Name="EndDatePicker" 
+                                        Width="200"
+                                        HorizontalAlignment="Left"
+                                        Style="{StaticResource ModernDatePicker}"/>
+                        </Grid>
+
+                        <Separator Margin="0,15" Background="#E5E7EB"/>
+
+                        <!-- Hafta Sonu Kısıtı -->
+                        <CheckBox x:Name="CumartesiPazarKisit"
+                                  Content="Cumartesi ve Pazar günleri sınav yapılmasın"
+                                  Style="{StaticResource ModernCheckBox}"
+                                  FontWeight="Medium"/>
+
+                        <Separator Margin="0,15" Background="#E5E7EB"/>
+
+                        <!-- Hariç Tutulacak Günler -->
+                        <TextBlock Text="Hariç Tutulacak Günler:" 
+                                   FontWeight="SemiBold"
+                                   Foreground="#374151"
+                                   FontSize="15"
+                                   Margin="0,0,0,12"/>
+                        <TextBlock Text="Sınav yapılmayacak özel günleri seçin (örn: resmi tatiller)" 
+                                   FontSize="12" 
+                                   Foreground="#6B7280"
+                                   Margin="0,0,0,12"/>
+                        
+                        <Border Background="White"
+                                BorderBrush="#E5E7EB"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="15"
+                                HorizontalAlignment="Left">
+                            <Calendar x:Name="HaricTutulacakTarihlerCalendar"
+                                      SelectionMode="MultipleRange"
+                                      Width="220"
+                                      Height="180"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sınav Ayarları Kartı -->
+                <Border Style="{StaticResource ModernCard}">
+                    <StackPanel>
+                        <TextBlock Text="⚙️ Sınav Ayarları" 
+                                   FontSize="18" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#1F2937"
+                                   Margin="0,0,0,20"/>
+
+                        <!-- Sınav Türü -->
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Sınav Türü:" 
+                                       VerticalAlignment="Center"
+                                       FontWeight="Medium"
+                                       Foreground="#374151"/>
                             <ComboBox x:Name="SinavTuruComboBox"
-                                      Width="200"
-                                      HorizontalAlignment="Left">
+                                      Grid.Column="1"
+                                      Width="250"
+                                      HorizontalAlignment="Left"
+                                      Style="{StaticResource ModernComboBox}">
                                 <ComboBoxItem Content="Vize"/>
                                 <ComboBoxItem Content="Final"/>
                                 <ComboBoxItem Content="Bütünleme"/>
                             </ComboBox>
-                        </StackPanel>
+                        </Grid>
 
-                        <TextBlock Text="Bekleme Süresi (dk):"
-                                   FontWeight="Bold"
-                                   Foreground="#34495E"
-                                   Margin="0,10,0,5"/>
-                        <TextBox x:Name="BeklemeSuresiTextBox"
-                                 Text="15"
-                                 Width="60"
-                                 Background="#F4F6F8"
-                                 BorderBrush="#D0D3D8"
-                                 BorderThickness="1"
-                                 Padding="3"
-                                 HorizontalContentAlignment="Center"/>
+                        <!-- Bekleme Süresi -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Bekleme Süresi:" 
+                                       VerticalAlignment="Center"
+                                       FontWeight="Medium"
+                                       Foreground="#374151"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBox x:Name="BeklemeSuresiTextBox"
+                                         Text="15"
+                                         Width="100"
+                                         Style="{StaticResource ModernTextBox}"
+                                         HorizontalContentAlignment="Center"/>
+                                <TextBlock Text="dakika" 
+                                           VerticalAlignment="Center"
+                                           Foreground="#6B7280"
+                                           Margin="10,0,0,0"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- BUTON -->
-                <Button Content="📅 Programı Oluştur"
-                        Padding="15,8"
-                        Width="220"
-                        FontWeight="SemiBold"
-                        FontSize="14"
-                        Background="#3498DB"
-                        Foreground="White"
-                        BorderBrush="#2980B9"
-                        BorderThickness="0"
-                        Cursor="Hand"
-                        HorizontalAlignment="Left"
-                        Margin="0,0,0,10"
-                        Click="ProgramiOlusturButton_Click">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <!-- Border'a isim veriyoruz -->
-                            <Border x:Name="buttonBorder"
-                                    Background="{TemplateBinding Background}"
-                                    CornerRadius="8"
-                                    Padding="{TemplateBinding Padding}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                <!-- Butonlar -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                    <Button x:Name="ProgramiOlusturButton"
+                            Content="🚀 Programı Oluştur"
+                            Style="{StaticResource PrimaryButton}"
+                            Click="ProgramiOlusturButton_Click"/>
+                    
+                    <Button x:Name="ExcelIndirButton"
+                            Content="📥 Excel Olarak İndir"
+                            Style="{StaticResource SecondaryButton}"
+                            Visibility="Collapsed"
+                            Click="ExcelIndirButton_Click"/>
+                </StackPanel>
 
-                            <!-- Trigger'larda TargetName belirtilmeli -->
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="buttonBorder" Property="Background" Value="#2980B9"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="buttonBorder" Property="Opacity" Value="0.85"/>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter TargetName="buttonBorder" Property="Opacity" Value="0.5"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
+                <!-- Sınav Programı Tablosu -->
+                <Border Style="{StaticResource ModernCard}">
+                    <StackPanel>
+                        <TextBlock Text="📋 Oluşturulan Sınav Programı" 
+                                   FontSize="18" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#1F2937"
+                                   Margin="0,0,0,20"/>
+
+                        <Border Background="#F9FAFB" 
+                                CornerRadius="12" 
+                                BorderBrush="#E5E7EB" 
+                                BorderThickness="1">
+                            <DataGrid x:Name="SinavProgramiDataGrid"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="None"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      RowStyle="{StaticResource DataGridRowStyle}"
+                                      ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                                      CellStyle="{StaticResource DataGridCellStyle}"
+                                      SelectionMode="Single"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto"
+                                      MaxHeight="400">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Ders" Binding="{Binding DersAdi}" Width="*"/>
+                                    <DataGridTextColumn Header="Öğretim Elemanı" Binding="{Binding OgretimGorevlisi}" Width="*"/>
+                                    <DataGridTextColumn Header="Tarih" Binding="{Binding Tarih}" Width="140"/>
+                                    <DataGridTextColumn Header="Saat" Binding="{Binding Saat}" Width="100"/>
+                                    <DataGridTextColumn Header="Salon" Binding="{Binding Salon}" Width="140"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </StackPanel>
+                </Border>
 
             </StackPanel>
-
-            <!-- DATAGRID -->
-            <Border Grid.Row="1"
-                    CornerRadius="10"
-                    BorderBrush="#DDE1E7"
-                    BorderThickness="1"
-                    Background="White"
-                    Padding="10">
-                <DataGrid x:Name="SinavProgramiDataGrid"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          RowBackground="#F9FAFB"
-                          AlternatingRowBackground="#EEF2F6"
-                          GridLinesVisibility="Horizontal"
-                          HeadersVisibility="Column"
-                          BorderThickness="0">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Ders" Binding="{Binding DersAdi}" Width="*" />
-                        <DataGridTextColumn Header="Tarih" Binding="{Binding Tarih}" Width="150" />
-                        <DataGridTextColumn Header="Saat" Binding="{Binding Saat}" Width="100" />
-                        <DataGridTextColumn Header="Salon" Binding="{Binding Salon}" Width="150" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
-        </Grid>
-    </ScrollViewer>
+        </ScrollViewer>
+    </Grid>
 </UserControl>

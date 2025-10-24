@@ -103,6 +103,15 @@ public class OgrenciService
 
             return flatList;
         }
+        
+        public async Task<List<OgrenciDersler>> GetAllOgrenciDerslerAsync()
+        {
+            // Öğrenci - Ders ilişkilerini getiriyoruz
+            return await _dbContext.OgrenciDersler
+                .Include(od => od.Ogrenci)
+                .Include(od => od.Ders)
+                .ToListAsync();
+        }
     }
 
     public class SaveResult
