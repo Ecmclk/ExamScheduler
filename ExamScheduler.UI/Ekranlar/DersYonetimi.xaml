@@ -1,0 +1,113 @@
+﻿<UserControl x:Class="ExamScheduler.UI.Ekranlar.DerslikYonetimi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="950">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+
+            <TextBlock Text="Derslik Yönetimi" FontSize="28" FontWeight="Bold" Margin="0,0,0,25"/>
+
+            <!-- 🟩 KOORDİNATÖR DERSLİK GİRİŞ ALANI -->
+            <Border BorderBrush="#CBD5E0" BorderThickness="1" CornerRadius="8" Padding="15" Background="#F7FAFC" Margin="0,0,0,25">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Yeni / Düzenle Derslik" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Derslik Kodu:" VerticalAlignment="Center" Width="120"/>
+                        <TextBox x:Name="DerslikKoduTextBox" Width="250" Height="28"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Derslik Adı:" VerticalAlignment="Center" Width="120"/>
+                        <TextBox x:Name="DerslikAdTextBox" Width="250" Height="28"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Kapasite:" VerticalAlignment="Center" Width="120"/>
+                        <TextBox x:Name="KapasiteTextBox" Width="80" Height="28"/>
+                        <TextBlock Text="Enine Sıra:" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                        <TextBox x:Name="EnineSiraTextBox" Width="50" Height="28"/>
+                        <TextBlock Text="Boyuna Sıra:" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                        <TextBox x:Name="BoyunaSiraTextBox" Width="50" Height="28"/>
+                        <TextBlock Text="Sıra Yapısı:" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                        <ComboBox x:Name="SiraYapisiComboBox" Width="60" Height="28">
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Güncelle" Width="120" Height="36" Margin="10,0,0,0" Background="#2F855A" Foreground="White" FontWeight="SemiBold" Click="GuncelleButton_Click" Visibility="Collapsed" x:Name="GuncelleButton"/>
+                        <Button x:Name="EkleButton" Content="Kaydet" Width="114" Height="36" Background="#3182CE" Foreground="White" FontWeight="SemiBold" Click="EkleButton_Click"/>
+                        <Button Content="İptal" Width="100" Height="36" Margin="10,0,0,0" Background="#718096" Foreground="White" FontWeight="SemiBold" Click="IptalButton_Click" Visibility="Collapsed" x:Name="IptalButton"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 🔍 ARAMA ALANI -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,25">
+                <TextBlock Text="Derslik Ara:" VerticalAlignment="Center" Width="100"/>
+                <TextBox x:Name="AramaTextBox" Width="200" Height="28" Margin="0,0,10,0" VerticalContentAlignment="Center"/>
+                <Button Content="Ara" Width="80" Height="30" Background="#3182CE" Foreground="White" FontWeight="SemiBold" Click="AraButton_Click"/>
+                <Button Content="Tümünü Göster" Width="130" Height="30" Margin="10,0,0,0" Background="#4A5568" Foreground="White" FontWeight="SemiBold" Click="TumunuGosterButton_Click"/>
+            </StackPanel>
+
+            <!-- 📋 DERSLİK LİSTESİ -->
+            <TextBlock Text="Sistemdeki Derslikler" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <DataGrid x:Name="DersliklerDataGrid"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      AlternatingRowBackground="#F7FAFC"
+                      HeadersVisibility="Column"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      Background="White"
+                      BorderThickness="0"
+                      MouseDoubleClick="DersliklerDataGrid_MouseDoubleClick"
+                      ColumnWidth="*"
+                      MinRowHeight="35"
+                      Margin="0,0,0,20">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding DerslikId}" Width="50"/>
+                    <DataGridTextColumn Header="Bölüm" Binding="{Binding Bolum.BolumAd}" Width="150"/>
+                    <DataGridTextColumn Header="Kodu" Binding="{Binding DerslikKod}" Width="100"/>
+                    <DataGridTextColumn Header="Adı" Binding="{Binding DerslikAd}" Width="*"/>
+                    <DataGridTextColumn Header="Kapasite" Binding="{Binding Kapasite}" Width="80"/>
+                    <DataGridTextColumn Header="Enine" Binding="{Binding EnineSira}" Width="70"/>
+                    <DataGridTextColumn Header="Boyuna" Binding="{Binding BoyunaSira}" Width="70"/>
+                    <DataGridTextColumn Header="Sıra Yapısı" Binding="{Binding SiraYapisi}" Width="80"/>
+
+                    <!-- 🧩 İşlem Butonları -->
+                    <DataGridTemplateColumn Header="İşlemler" Width="160">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Düzenle"
+                                            Background="#2F855A"
+                                            Foreground="White"
+                                            FontWeight="SemiBold"
+                                            Margin="0,0,5,0"
+                                            Tag="{Binding DerslikId}"
+                                            Click="DuzenleButton_Click"/>
+                                    <Button Content="Sil"
+                                            Background="#E53E3E"
+                                            Foreground="White"
+                                            FontWeight="SemiBold"
+                                            Tag="{Binding DerslikId}"
+                                            Click="SilButton_Click"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
