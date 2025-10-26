@@ -1,60 +1,49 @@
 ﻿using ExamScheduler.Data;
-using ExamScheduler.Models;
 using ExamScheduler.Models.Models;
 using ExamScheduler.Services;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace ExamScheduler.UI
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            // Gerekli servisleri ve veritabanı bağlamını oluşturuyoruz.
-            AppDbContext context = new AppDbContext();
-            UserService userService = new UserService(context);
+            using var context = new AppDbContext();
+            var userService = new UserService(context);
 
-            // Admin kullanıcısını oluşturma metodunu burada çağırıyoruz.
-            SeedAdminUser(context, userService);
+            await SeedAdminUserAsync(context, userService);
 
-            // Artık ana penceremizi oluşturup gösterebiliriz.
+            // MainWindow parametresiz versiyon
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
         }
 
-        /// <summary>
-        /// Veritabanını kontrol eder ve hiç kullanıcı yoksa varsayılan Admin kullanıcısını oluşturur.
-        /// </summary>
-        private void SeedAdminUser(AppDbContext context, UserService userService)
+        private async Task SeedAdminUserAsync(AppDbContext context, UserService userService)
         {
-            // Eğer veritabanındaki Kullanicilar tablosunda HİÇ kayıt yoksa
-            if (!context.Kullanicilar.Any())
+            // Eğer hiç kullanıcı yoksa varsayılan admin ekle
+            if (!await context.Kullanicilar.AnyAsync())
             {
-                // Admin için bir şifre belirliyoruz ve bunun hash/salt değerlerini üretiyoruz.
-                userService.CreatePasswordHash("admin123", out byte[] passwordHash, out byte[] passwordSalt);
+                userService.CreatePasswordHash("admin123", out byte[] hash, out byte[] salt);
 
-                // Yeni bir Kullanicilar nesnesi oluşturup bilgilerini dolduruyoruz.
-                var adminUser = new Kullanicilar
+                var admin = new Kullanicilar
                 {
                     Eposta = "admin@example.com",
                     AdSoyad = "Sistem Yöneticisi",
-                    RolId = 1, // Roller tablosunda 'Admin' ID'sinin 1 olduğunu varsayıyoruz.
+                    RolId = 1,           // 1 = Admin
+                    BolumId = null,      // Admin bölümsüz
                     Aktiflik = true,
-                    BolumId = null, // Admin bir bölüme ait değildir.
-                    SifreHash = passwordHash,
-                    SifreSalt = passwordSalt
+                    SifreHash = hash,
+                    SifreSalt = salt
                 };
 
-                // Oluşturduğumuz bu kullanıcıyı veritabanına ekliyoruz.
-                context.Kullanicilar.Add(adminUser);
-                context.SaveChanges(); // Değişiklikleri veritabanına kaydediyoruz.
-                MessageBox.Show("Veritabanı boştu. Varsayılan Admin kullanıcısı oluşturuldu.\nE-posta: admin@example.com\nŞifre: admin123", "Kurulum Bilgisi", MessageBoxButton.OK, MessageBoxImage.Information);
+                context.Kullanicilar.Add(admin);
+                await context.SaveChangesAsync();
+
             }
         }
     }

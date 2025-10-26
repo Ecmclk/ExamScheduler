@@ -1,0 +1,110 @@
+﻿<UserControl x:Class="ExamScheduler.UI.Ekranlar.OturmaPlani"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1000">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+
+            <!-- 🧾 Başlık -->
+            <TextBlock Text="Ders Bazlı Oturma Planı"
+                       FontSize="26"
+                       FontWeight="Bold"
+                       Margin="0,0,0,20"/>
+
+            <!-- 🎓 Ders ve Derslik Seçimi -->
+            <Border BorderBrush="#CBD5E0"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="15"
+                    Background="#F7FAFC"
+                    Margin="0,0,0,25">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,8">
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Ders:" Width="100" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="DersComboBox"
+                                  Width="300"
+                                  Height="30"
+                                  SelectionChanged="DersComboBox_SelectionChanged"
+                                  DisplayMemberPath="DersAdi"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,10">
+                        <TextBlock Text="Derslik(ler):" Margin="0,0,0,5"/>
+                        <ListBox x:Name="DerslikListBox"
+                                 SelectionMode="Extended"
+                                 Height="120"
+                                 BorderBrush="#CBD5E0"
+                                 BorderThickness="1"
+                                 DisplayMemberPath="DerslikAd"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
+                        <Button x:Name="PlanOlusturButton"
+                                Content="📋 Plan Oluştur"
+                                Width="150"
+                                Height="36"
+                                Background="#3182CE"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                Click="PlanOlusturButton_Click"/>
+                        <Button x:Name="PdfKaydetButton"
+                                Content="💾 PDF Kaydet"
+                                Width="140"
+                                Height="36"
+                                Margin="10,0,0,0"
+                                Background="#2F855A"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                Click="PdfKaydetButton_Click"/>
+                    </StackPanel>
+
+                    <TextBlock x:Name="BilgiText"
+                               Text=""
+                               FontSize="13"
+                               Foreground="#2D3748"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 📊 Sekmeli Görsel Oturma Planı -->
+            <TextBlock Text="Oturma Düzeni Görseli"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,8"/>
+
+            <TabControl x:Name="SalonTabs"
+                        Height="400"
+                        Margin="0,0,0,25"
+                        BorderBrush="#CBD5E0"
+                        BorderThickness="1"
+                        Background="White"/>
+
+            <!-- 📋 Öğrenci–Sıra Tablosu -->
+            <TextBlock Text="Oturma Listesi (Tablo)"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,8"/>
+
+            <DataGrid x:Name="OturmaListesiGrid"
+                      AutoGenerateColumns="True"
+                      CanUserAddRows="False"
+                      AlternatingRowBackground="#F7FAFC"
+                      GridLinesVisibility="None"
+                      HeadersVisibility="Column"
+                      SelectionMode="Single"
+                      BorderThickness="1"
+                      BorderBrush="#E2E8F0"
+                      Background="White"
+                      Height="300"
+                      Margin="0,0,0,15"
+                      ColumnWidth="*"
+                      FontSize="14"/>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
