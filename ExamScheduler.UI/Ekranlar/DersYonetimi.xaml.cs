@@ -172,6 +172,7 @@ namespace ExamScheduler.UI.Ekranlar
 
                 OgrencilerDataGrid.ItemsSource = displayList;
 
+                OgrenciSayisiTextBlock.Text = $"({displayList.Count} öğrenci)";
             
             }
             catch (Exception ex)

@@ -133,6 +133,7 @@ namespace ExamScheduler.UI.Ekranlar
         }
     
 
+        public event Action<List<SinavKaydi>> SinavProgramiOlusturuldu;
 
 
 private async void ProgramiOlusturButton_Click(object sender, RoutedEventArgs e)
@@ -325,6 +326,29 @@ private async void ProgramiOlusturButton_Click(object sender, RoutedEventArgs e)
                 ExcelIndirButton.Visibility = Visibility.Visible;
 
                 MessageBox.Show("Sınav programı başarıyla oluşturuldu!");
+                
+                if (_olusturulanProgram.Any())
+                {
+                    SinavProgramiOlusturuldu?.Invoke(_olusturulanProgram);
+                }
+                
+                var mainWindow = Application.Current.Windows.OfType<MainPanelWindow>().FirstOrDefault();
+                if (mainWindow != null && _olusturulanProgram.Any())
+                {
+                    var secilenSinav = _olusturulanProgram.First(); // Örnek olarak ilk sınav
+                    var ogrenciListesi = secilenSinav.OgrenciIdListesi
+                        .Select(id => _context.Ogrenciler.First(o => o.OgrenciId == id))
+                        .ToList();
+
+                    // MainPanelWindow'a ata
+                    mainWindow.SonOluşturulanSinav = secilenSinav;
+                    mainWindow.SonSinavOgrencileri = ogrenciListesi;
+
+                    // Oturma Planı butonunu görünür yap
+                    mainWindow.OturmaPlaniButton.Visibility = Visibility.Visible;
+                }
+
+                
             }
             catch (Exception ex)
             {
@@ -455,6 +479,8 @@ private async void ProgramiOlusturButton_Click(object sender, RoutedEventArgs e)
         }
 
         MessageBox.Show("Excel dosyası başarıyla oluşturuldu!");
+        
+
     }
     catch (Exception ex)
     {

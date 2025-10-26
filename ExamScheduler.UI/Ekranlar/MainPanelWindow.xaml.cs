@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using ExamScheduler.Data;
+using ExamScheduler.Models.Models;
 using ExamScheduler.Services;
 using ExamScheduler.UI.Ekranlar;
 
@@ -11,6 +12,12 @@ namespace ExamScheduler.UI
         private readonly DersService _dersService;
         private readonly OgrenciService _ogrenciService;
         private readonly AppDbContext _context;
+  
+        private List<SinavKaydi> _olusturulanProgram;
+        public List<SinavKaydi> OlusturulanProgram => _olusturulanProgram;
+
+        public SinavKaydi SonOluşturulanSinav { get; set; }
+        public List<Ogrenciler> SonSinavOgrencileri { get; set; }
         public MainPanelWindow()
         {
             InitializeComponent();
@@ -24,6 +31,7 @@ namespace ExamScheduler.UI
 
             // Varsayılan olarak kontrol paneli gelsin
             LoadUserControl(new KontrolPaneli());
+            
 
             // Menü kontrolü
             _ = CheckIfExamMenuShouldBeVisible();
@@ -95,7 +103,30 @@ namespace ExamScheduler.UI
 
         private void SinavProgrami_Click(object sender, RoutedEventArgs e)
         {
-            LoadUserControl(new SinavProgramiOlustur(_context));
+            var sinavKontrol = new SinavProgramiOlustur(_context);
+
+            // Event ile _olusturulanProgram’ı al
+            sinavKontrol.SinavProgramiOlusturuldu += (program) =>
+            {
+                _olusturulanProgram = program; // tüm dersler burada saklanır
+            };
+
+            LoadUserControl(sinavKontrol);
+          
         }
+
+        private void OturmaPlani_Click(object sender, RoutedEventArgs e)
+        {
+            if (_olusturulanProgram == null || !_olusturulanProgram.Any())
+            {
+                MessageBox.Show("Önce sınav programı oluşturmalısınız!");
+                return;
+            }
+
+            var oturmaPlaniControl = new OturmaPlani(_context);
+            oturmaPlaniControl.SetSinavProgrami(_olusturulanProgram); // tüm dersler gönderiliyor
+            LoadUserControl(oturmaPlaniControl);
+        }
+
     }
 }
