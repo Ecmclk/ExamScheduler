@@ -129,7 +129,7 @@
                                 Visibility="Collapsed"
                                 Style="{StaticResource NavButtonStyle}"/>
                         <Button x:Name="OturmaPlaniButton" 
-                                Content="📋 Oturma Planı Oluştur" 
+                                Content="💺 Oturma Planı Oluştur" 
                                 Click="OturmaPlani_Click" 
                                 Visibility="Collapsed"
                                 Style="{StaticResource NavButtonStyle}"/>

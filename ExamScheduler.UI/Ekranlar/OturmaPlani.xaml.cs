@@ -97,153 +97,195 @@ namespace ExamScheduler.UI.Ekranlar
                 DerslikButonPanel.Children.Add(btn);
             }
         }
+        
+// DersId -> (DerslikAd -> Öğrenci listesi)
+        private readonly Dictionary<int, Dictionary<string, List<Ogrenciler>>> _dersOturmaPlanlari = new();
+
         private void DerslikButton_Click(object sender, RoutedEventArgs e)
-        {
-            var btn = sender as Button;
-            if (btn == null || btn.Tag == null) return;
+{
+    var btn = sender as Button;
+    if (btn == null || btn.Tag == null) return;
 
-            // Tag aslında bir anonim tip olacak şekilde atanmalı
-            // Örn: btn.Tag = new { Derslik = derslik, Sinavlar = grup.ToList() };
-            var tagType = btn.Tag.GetType();
+    var tagType = btn.Tag.GetType();
+    var derslik = tagType.GetProperty("Derslik")?.GetValue(btn.Tag) as Derslikler;
+    var sinavlar = tagType.GetProperty("Sinavlar")?.GetValue(btn.Tag) as List<SinavKaydi>;
+    if (derslik == null || sinavlar == null) return;
 
-            var derslik = tagType.GetProperty("Derslik")?.GetValue(btn.Tag) as Derslikler;
-            var sinavlar = tagType.GetProperty("Sinavlar")?.GetValue(btn.Tag) as List<SinavKaydi>;
+    OturmaAlani.Children.Clear();
 
-            if (derslik == null || sinavlar == null) return;
+    var secilenDers = SinavListBox.SelectedItem;
+    int dersId = (int)secilenDers.GetType().GetProperty("DersId").GetValue(secilenDers);
 
-            OturmaAlani.Children.Clear();
+    // Bu derse ait tüm öğrencileri getir
+    var tumOgrenciler = sinavlar
+        .SelectMany(s => s.OgrenciIdListesi)
+        .Select(id => _context.Ogrenciler.FirstOrDefault(o => o.OgrenciId == id))
+        .Where(o => o != null)
+        .ToList();
 
-            var ogrenciler = sinavlar
-                .SelectMany(s => s.OgrenciIdListesi)
-                .Select(id => _context.Ogrenciler.FirstOrDefault(o => o.OgrenciId == id))
-                .Where(o => o != null)
-                .ToList();
+    // Eğer bu ders için plan oluşturulmadıysa yeni dictionary yarat
+    if (!_dersOturmaPlanlari.ContainsKey(dersId))
+        _dersOturmaPlanlari[dersId] = new Dictionary<string, List<Ogrenciler>>();
 
-            OturmaAlani.Children.Add(new TextBlock
-            {
-                Text = $"Derslik: {derslik.DerslikAd}",
-                FontSize = 16,
-                FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 8, 0, 8),
-                HorizontalAlignment = HorizontalAlignment.Center
-            });
+    // Eğer bu derslik için plan yoksa oluştur
+    if (!_dersOturmaPlanlari[dersId].ContainsKey(derslik.DerslikAd))
+    {
+        // Random dağıtım
+        var random = new Random();
 
-            CizOturmaDuzeni(derslik, ogrenciler);
+        // Toplam öğrenci listesini karıştır
+        var karisik = tumOgrenciler.OrderBy(x => random.Next()).ToList();
 
-            PDFIndirButton.Visibility = Visibility.Visible;
-            PDFIndirButton.Tag = new { Derslik = derslik, Ogrenciler = ogrenciler };
-        }
+        // Bu derslikteki öğrenci sayısını hesapla (örneğin eşit bölüştürme)
+        var derslikler = sinavlar.Select(s => s.Salon).Distinct().ToList();
+        int ogrSayisi = karisik.Count / derslikler.Count;
+        int kalan = karisik.Count % derslikler.Count;
+
+        // Hangi dersliğin kaç kişi alacağını belirle (dengeli dağıtım)
+        int salonIndex = derslikler.IndexOf(derslik.DerslikAd);
+        int baslangic = salonIndex * ogrSayisi + Math.Min(salonIndex, kalan);
+        int uzunluk = ogrSayisi + (salonIndex < kalan ? 1 : 0);
+
+        var ogrencilerBuSalon = karisik.Skip(baslangic).Take(uzunluk).ToList();
+
+        _dersOturmaPlanlari[dersId][derslik.DerslikAd] = ogrencilerBuSalon;
+    }
+
+    // Artık kaydedilen sabit listeyi alıyoruz
+    var sabitOgrenciListesi = _dersOturmaPlanlari[dersId][derslik.DerslikAd];
+
+    OturmaAlani.Children.Add(new TextBlock
+    {
+        Text = $"Derslik: {derslik.DerslikAd}",
+        FontSize = 16,
+        FontWeight = FontWeights.Bold,
+        Margin = new Thickness(0, 8, 0, 8),
+        HorizontalAlignment = HorizontalAlignment.Center
+    });
+
+    CizOturmaDuzeni(derslik, sabitOgrenciListesi);
+
+    PDFIndirButton.Visibility = Visibility.Visible;
+    PDFIndirButton.Tag = new { Derslik = derslik, Ogrenciler = sabitOgrenciListesi };
+}
+
 
 
 
 
         private void CizOturmaDuzeni(Derslikler derslik, List<Ogrenciler> ogrenciListesi)
-        {
-            if (derslik.EnineSira <= 0 || derslik.BoyunaSira <= 0)
-            {
-                MessageBox.Show("Geçerli sıra bilgisi bulunamadı.", "Uyarı", MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
-            }
+{
+    if (derslik.EnineSira <= 0 || derslik.BoyunaSira <= 0)
+    {
+        MessageBox.Show("Geçerli sıra bilgisi bulunamadı.", "Uyarı", MessageBoxButton.OK,
+            MessageBoxImage.Warning);
+        return;
+    }
 
-            var mainPanel = new StackPanel
+    var mainPanel = new StackPanel
+    {
+        Orientation = Orientation.Vertical,
+        HorizontalAlignment = HorizontalAlignment.Center
+    };
+
+    int ogrenciIndex = 0;
+    int koltukNo = 1; // koltuk numaraları
+
+    bool[,,] doluMatris = new bool[derslik.BoyunaSira, derslik.EnineSira, derslik.SiraYapisi];
+
+    for (int i = 0; i < derslik.BoyunaSira; i++)
+    {
+        var rowPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 4, 0, 4),
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+
+        for (int j = 0; j < derslik.EnineSira; j++)
+        {
+            var grupPanel = new StackPanel
             {
-                Orientation = Orientation.Vertical,
-                HorizontalAlignment = HorizontalAlignment.Center
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(12, 0, 12, 0)
             };
 
-            int ogrenciIndex = 0;
-            int toplamSira = derslik.BoyunaSira * derslik.EnineSira * derslik.SiraYapisi;
-
-            // Matris: BoyunaSira x EnineSira x SiraYapisi
-            bool[,,] doluMatris = new bool[derslik.BoyunaSira, derslik.EnineSira, derslik.SiraYapisi];
-
-            for (int i = 0; i < derslik.BoyunaSira; i++)
+            for (int k = 0; k < derslik.SiraYapisi; k++)
             {
-                var rowPanel = new StackPanel
+                var sira = new Border
                 {
-                    Orientation = Orientation.Horizontal,
-                    Margin = new Thickness(0, 4, 0, 4),
-                    HorizontalAlignment = HorizontalAlignment.Center
+                    Width = 70,
+                    Height = 60,
+                    Margin = new Thickness(3),
+                    Background = Brushes.White,
+                    BorderBrush = Brushes.Gray,
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(6)
                 };
 
-                for (int j = 0; j < derslik.EnineSira; j++)
+                string textStr;
+
+                bool yanYanaVar = false;
+                if (k > 0 && doluMatris[i, j, k - 1]) yanYanaVar = true;
+                if (k == 0 && j > 0 && doluMatris[i, j - 1, derslik.SiraYapisi - 1]) yanYanaVar = true;
+
+                bool onArkaVar = false;
+                if (i > 0)
                 {
-                    var grupPanel = new StackPanel
-                    {
-                        Orientation = Orientation.Horizontal,
-                        Margin = new Thickness(12, 0, 12, 0)
-                    };
-
-                    for (int k = 0; k < derslik.SiraYapisi; k++)
-                    {
-                        var sira = new Border
-                        {
-                            Width = 60,
-                            Height = 50,
-                            Margin = new Thickness(3),
-                            Background = Brushes.White,
-                            BorderBrush = Brushes.Gray,
-                            BorderThickness = new Thickness(1),
-                            CornerRadius = new CornerRadius(6)
-                        };
-
-                        string textStr = "";
-
-                        // Yan yana kontrol
-                        bool yanYanaVar = false;
-                        if (k > 0 && doluMatris[i, j, k - 1]) yanYanaVar = true;
-                        if (k == 0 && j > 0 && doluMatris[i, j - 1, derslik.SiraYapisi - 1]) yanYanaVar = true;
-
-                        // Ön-arka bağlantı kontrolü: önceki sıradaki aynı konumdaki koltuk dolu mu
-                        bool onArkaVar = false;
-                        if (i > 0)
-                        {
-                            if (doluMatris[i - 1, j, k]) onArkaVar = true;
-                        }
-
-                        // Yerleşim: yan yana boş, ön-arka dolu olmalı
-                        if (!yanYanaVar && (i == 0 || onArkaVar) && ogrenciIndex < ogrenciListesi.Count)
-                        {
-                            var ogr = ogrenciListesi[ogrenciIndex++];
-                            textStr = $"{ogr.OgrenciNo}\n{ogr.AdSoyad}";
-                            doluMatris[i, j, k] = true;
-                            sira.Background = Brushes.LightBlue;
-                        }
-
-                        var text = new TextBlock
-                        {
-                            Text = string.IsNullOrEmpty(textStr) ? "-" : textStr,
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            TextAlignment = TextAlignment.Center,
-                            Foreground = Brushes.Black,
-                            FontWeight = FontWeights.SemiBold,
-                            FontSize = 12
-                        };
-
-                        sira.Child = text;
-                        grupPanel.Children.Add(sira);
-                    }
-
-                    var grupBorder = new Border
-                    {
-                        Padding = new Thickness(6),
-                        CornerRadius = new CornerRadius(8),
-                        BorderThickness = new Thickness(1),
-                        BorderBrush = Brushes.LightGray,
-                        Background = new SolidColorBrush(Color.FromRgb(245, 250, 255)),
-                        Child = grupPanel
-                    };
-
-                    rowPanel.Children.Add(grupBorder);
+                    if (doluMatris[i - 1, j, k]) onArkaVar = true;
                 }
 
-                mainPanel.Children.Add(rowPanel);
+                // boş koltuk da numaralandırılır
+                if (!yanYanaVar && (i == 0 || onArkaVar) && ogrenciIndex < ogrenciListesi.Count)
+                {
+                    var ogr = ogrenciListesi[ogrenciIndex++];
+                    textStr = $"{koltukNo}\n{ogr.OgrenciNo}\n{ogr.AdSoyad}";
+                    doluMatris[i, j, k] = true;
+                    sira.Background = Brushes.LightBlue;
+                }
+                else
+                {
+                    textStr = $"{koltukNo}\n-";
+                }
+
+                var text = new TextBlock
+                {
+                    Text = textStr,
+                    TextAlignment = TextAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    Foreground = Brushes.Black,
+                    FontWeight = FontWeights.SemiBold,
+                    FontSize = 11,
+                    Margin = new Thickness(2)
+                };
+
+                sira.Child = text;
+                grupPanel.Children.Add(sira);
+
+                koltukNo++; // koltuk numarasını artır
             }
 
-            OturmaAlani.Children.Add(mainPanel);
+            var grupBorder = new Border
+            {
+                Padding = new Thickness(6),
+                CornerRadius = new CornerRadius(8),
+                BorderThickness = new Thickness(1),
+                BorderBrush = Brushes.LightGray,
+                Background = new SolidColorBrush(Color.FromRgb(245, 250, 255)),
+                Child = grupPanel
+            };
+
+            rowPanel.Children.Add(grupBorder);
         }
+
+        mainPanel.Children.Add(rowPanel);
+    }
+
+    OturmaAlani.Children.Add(mainPanel);
+}
+
 
 
         
@@ -295,7 +337,7 @@ namespace ExamScheduler.UI.Ekranlar
                 int w = (int)(OturmaAlani.ActualWidth * 2);
                 int h = (int)(OturmaAlani.ActualHeight * 2);
 
-                RenderTargetBitmap rtb = new RenderTargetBitmap(w, h, 192, 192, PixelFormats.Pbgra32);
+                RenderTargetBitmap rtb = new RenderTargetBitmap(w, h, 185, 185, PixelFormats.Pbgra32);
                 rtb.Render(OturmaAlani);
 
                 PngBitmapEncoder encoder = new PngBitmapEncoder();

@@ -413,7 +413,15 @@
                                   FontWeight="Medium"/>
 
                         <Separator Margin="0,15" Background="#E5E7EB"/>
+                        
 
+                        <CheckBox x:Name="AyniZamanaDenkGelmesinCheckBox"
+                                  Content="Sınavlar çakışmasın"
+                                  Style="{StaticResource ModernCheckBox}"
+                                  FontWeight="Medium"/>
+                        
+                        <Separator Margin="0,15" Background="#E5E7EB"/>
+                        
                         <!-- Hariç Tutulacak Günler -->
                         <TextBlock Text="Hariç Tutulacak Günler:" 
                                    FontWeight="SemiBold"

@@ -137,224 +137,229 @@ namespace ExamScheduler.UI.Ekranlar
 
 
 private async void ProgramiOlusturButton_Click(object sender, RoutedEventArgs e)
+{
+    try
+    {
+        var seciliDersler = DersListBox.ItemsSource
+            .Cast<Dersler>()
+            .Where(d => d.Secili)
+            .ToList();
+
+        if (!seciliDersler.Any())
         {
-            try
+            MessageBox.Show("Lütfen en az bir ders seçin!");
+            return;
+        }
+
+        DateTime? start = StartDatePicker.SelectedDate;
+        DateTime? end = EndDatePicker.SelectedDate;
+
+        if (start == null || end == null || start > end)
+        {
+            MessageBox.Show("Geçerli bir tarih aralığı seçiniz!");
+            return;
+        }
+
+        int beklemeSuresi = int.TryParse(BeklemeSuresiTextBox.Text, out var bs) ? bs : 15;
+        bool haftaSonuYok = CumartesiPazarKisit.IsChecked == true;
+        var haricTarihler = HaricTutulacakTarihlerCalendar.SelectedDates.ToHashSet();
+
+        int seciliBolumId = (int)BolumComboBox.SelectedValue;
+        var tumDerslikler = await _context.Derslikler
+            .Where(d => d.BolumId == seciliBolumId)
+            .ToListAsync();
+
+        if (!tumDerslikler.Any())
+        {
+            MessageBox.Show("Sistemde derslik bulunamadı!");
+            return;
+        }
+
+        var uygunTarihler = Enumerable.Range(0, (end.Value - start.Value).Days + 1)
+            .Select(i => start.Value.AddDays(i))
+            .Where(t => (!haftaSonuYok || (t.DayOfWeek != DayOfWeek.Saturday && t.DayOfWeek != DayOfWeek.Sunday)) &&
+                        !haricTarihler.Contains(t))
+            .ToList();
+
+        if (!uygunTarihler.Any())
+        {
+            MessageBox.Show("Seçilen tarih aralığı sınav planlaması için uygun değil!");
+            return;
+        }
+
+        var ogrenciDersMap = await _context.OgrenciDersler
+            .GroupBy(x => x.DersId)
+            .ToDictionaryAsync(g => g.Key, g => g.Select(x => x.OgrenciId).ToList());
+
+        var sinavProgrami = new List<SinavKaydi>();
+        var hataListesi = new List<string>();
+
+        var sinifGruplari = seciliDersler.GroupBy(d => d.Sinif);
+
+        foreach (var sinifGrup in sinifGruplari)
+        {
+            var dersler = sinifGrup.ToList();
+            int dersSayisi = dersler.Count;
+            int gunSayisi = uygunTarihler.Count;
+
+            var dagilim = new List<int>(new int[gunSayisi]);
+            int kalan = dersSayisi;
+            int i = 0;
+            while (kalan > 0)
             {
-                
-                var seciliDersler = DersListBox.ItemsSource
-                    .Cast<Dersler>()
-                    .Where(d => d.Secili)
-                    .ToList();
+                dagilim[i % gunSayisi]++;
+                kalan--;
+                i++;
+            }
 
-                if (!seciliDersler.Any())
+            int dersIndex = 0;
+            for (int g = 0; g < dagilim.Count; g++)
+            {
+                var tarih = uygunTarihler[g % gunSayisi];
+                int oGunSinavSayisi = dagilim[g];
+
+                for (int j = 0; j < oGunSinavSayisi && dersIndex < dersler.Count; j++)
                 {
-                    MessageBox.Show("Lütfen en az bir ders seçin!");
-                    return;
-                }
+                    var ders = dersler[dersIndex++];
+                    var ogrenciIdListesi = ogrenciDersMap.TryGetValue(ders.DersId, out var liste) ? liste : new List<int>();
 
-                DateTime? start = StartDatePicker.SelectedDate;
-                DateTime? end = EndDatePicker.SelectedDate;
+                    if (!ogrenciIdListesi.Any()) continue;
 
-                if (start == null || end == null || start > end)
-                {
-                    MessageBox.Show("Geçerli bir tarih aralığı seçiniz!");
-                    return;
-                }
+                    var gunIciSaatler = new List<TimeSpan>();
+                    TimeSpan baslangic = new(9, 0, 0);
+                    TimeSpan bitis = new(19, 0, 0);
+                    TimeSpan adim = TimeSpan.FromMinutes(ders.SinavSuresi + beklemeSuresi);
 
-                int beklemeSuresi = int.TryParse(BeklemeSuresiTextBox.Text, out var bs) ? bs : 15;
-                bool haftaSonuYok = CumartesiPazarKisit.IsChecked == true;
-                var haricTarihler = HaricTutulacakTarihlerCalendar.SelectedDates.ToHashSet();
+                    for (var saat = baslangic; saat + TimeSpan.FromMinutes(ders.SinavSuresi) <= bitis; saat = saat.Add(adim))
+                        gunIciSaatler.Add(saat);
 
-                int seciliBolumId = (int)BolumComboBox.SelectedValue;
-                var tumDerslikler = await _context.Derslikler
-                    .Where(d => d.BolumId == seciliBolumId)
-                    .ToListAsync();
-                
-                if (!tumDerslikler.Any())
-                {
-                    MessageBox.Show("Sistemde derslik bulunamadı!");
-                    return;
-                }
+                    TimeSpan? uygunSaat = null;
+                    List<Derslikler> kullanilacakSalonlar = null;
 
-                var uygunTarihler = Enumerable.Range(0, (end.Value - start.Value).Days + 1)
-                    .Select(i => start.Value.AddDays(i))
-                    .Where(t => (!haftaSonuYok || (t.DayOfWeek != DayOfWeek.Saturday && t.DayOfWeek != DayOfWeek.Sunday)) &&
-                                !haricTarihler.Contains(t))
-                    .ToList();
-
-                if (!uygunTarihler.Any())
-                {
-                    MessageBox.Show("Seçilen tarih aralığı sınav planlaması için uygun değil!");
-                    return;
-                }
-
-                // Öğrenci-ders map sadece bir kez alınır
-                var ogrenciDersMap = await _context.OgrenciDersler
-                    .GroupBy(x => x.DersId)
-                    .ToDictionaryAsync(g => g.Key, g => g.Select(x => x.OgrenciId).ToList());
-
-                var sinavProgrami = new List<SinavKaydi>();
-                var hataListesi = new List<string>();
-
-                var sinifGruplari = seciliDersler.GroupBy(d => d.Sinif);
-                foreach (var sinifGrup in sinifGruplari)
-                {
-                    var dersler = sinifGrup.ToList();
-                    int dersSayisi = dersler.Count;
-                    int gunSayisi = uygunTarihler.Count;
-
-                    var dagilim = new List<int>(new int[gunSayisi]);
-                    int kalan = dersSayisi;
-                    int i = 0;
-                    while (kalan > 0)
+                    foreach (var saat in gunIciSaatler)
                     {
-                        dagilim[i % gunSayisi]++;
-                        kalan--;
-                        i++;
+                        bool dersCakisiyorMu = false;
+                        bool ogrenciCakisiyorMu = false;
+
+                        if (AyniZamanaDenkGelmesinCheckBox.IsChecked == true)
+                        {
+                            dersCakisiyorMu = sinavProgrami.Any(sp =>
+                                sp.Tarih == tarih &&
+                                SaatlerCakisiyorMu(sp.Saat, sp.SinavSuresi, saat, ders.SinavSuresi, beklemeSuresi));
+
+                            ogrenciCakisiyorMu = sinavProgrami.Any(sp =>
+                                sp.Tarih == tarih &&
+                                sp.OgrenciIdListesi != null &&
+                                sp.OgrenciIdListesi.Any(id => ogrenciIdListesi.Contains(id)) &&
+                                SaatlerCakisiyorMu(sp.Saat, sp.SinavSuresi, saat, ders.SinavSuresi, beklemeSuresi));
+                        }
+                        else
+                        {
+                            ogrenciCakisiyorMu = sinavProgrami.Any(sp =>
+                                sp.Tarih == tarih &&
+                                sp.OgrenciIdListesi != null &&
+                                sp.OgrenciIdListesi.Any(id => ogrenciIdListesi.Contains(id)) &&
+                                SaatlerCakisiyorMu(sp.Saat, sp.SinavSuresi, saat, ders.SinavSuresi, beklemeSuresi));
+                        }
+
+                        if (dersCakisiyorMu || ogrenciCakisiyorMu)
+                            continue;
+
+                        var bosSalonlar = tumDerslikler
+                            .Where(salon => !sinavProgrami.Any(sp =>
+                                sp.Tarih == tarih &&
+                                sp.Salon == salon.DerslikAd &&
+                                SaatlerCakisiyorMu(sp.Saat, sp.SinavSuresi, saat, ders.SinavSuresi, beklemeSuresi)))
+                            .OrderByDescending(s => s.Kapasite)
+                            .ToList();
+
+                        int kalanOgrenci = ogrenciIdListesi.Count;
+                        var kullanilacakSalonlarTemp = new List<Derslikler>();
+
+                        foreach (var salon in bosSalonlar)
+                        {
+                            if (kalanOgrenci <= 0) break;
+
+                            kullanilacakSalonlarTemp.Add(salon);
+                            kalanOgrenci -= salon.Kapasite;
+                        }
+
+// Eğer öğrenci sayısını yerleştirebildiyse
+                        if (kalanOgrenci <= 0)
+                        {
+                            uygunSaat = saat;
+                            kullanilacakSalonlar = kullanilacakSalonlarTemp;
+                            break;
+                        }
+                        
+
                     }
 
-                    int dersIndex = 0;
-                    for (int g = 0; g < dagilim.Count; g++)
+                    if (uygunSaat != null && kullanilacakSalonlar != null)
                     {
-                        var tarih = uygunTarihler[g % gunSayisi];
-                        int oGunSinavSayisi = dagilim[g];
-
-                        for (int j = 0; j < oGunSinavSayisi && dersIndex < dersler.Count; j++)
+                        int ogrenciIndex = 0;
+                        foreach (var salon in kullanilacakSalonlar)
                         {
-                            var ders = dersler[dersIndex++];
-                            var ogrenciIdListesi = ogrenciDersMap.TryGetValue(ders.DersId, out var liste)
-                                ? liste
-                                : new List<int>();
+                            int kapasite = salon.Kapasite;
+                            var ogrenciler = ogrenciIdListesi.Skip(ogrenciIndex).Take(kapasite).ToList();
+                            ogrenciIndex += ogrenciler.Count;
 
-                            if (!ogrenciIdListesi.Any()) continue;
-
-                            var gunIciSaatler = new List<TimeSpan>();
-                            TimeSpan baslangic = new(9, 0, 0);
-                            TimeSpan bitis = new(17, 0, 0);
-                            TimeSpan adim = TimeSpan.FromMinutes(ders.SinavSuresi + beklemeSuresi);
-
-                            for (var saat = baslangic; saat + TimeSpan.FromMinutes(ders.SinavSuresi) <= bitis; saat = saat.Add(adim))
-                                gunIciSaatler.Add(saat);
-
-                            TimeSpan? uygunSaat = null;
-                            List<Derslikler> kullanilacakSalonlar = null;
-
-                            foreach (var saat in gunIciSaatler)
+                            sinavProgrami.Add(new SinavKaydi
                             {
-                                bool ogrenciCakisiyorMu = sinavProgrami.Any(sp =>
-                                    sp.Tarih == tarih &&
-                                    sp.OgrenciIdListesi != null &&
-                                    sp.OgrenciIdListesi.Any(id => ogrenciIdListesi.Contains(id)) &&
-                                    SaatlerCakisiyorMu(sp.Saat, sp.SinavSuresi, saat, ders.SinavSuresi, beklemeSuresi)
-                                );
+                                DersId = ders.DersId,
+                                DersAdi = ders.DersAdi,
+                                Tarih = tarih,
+                                Saat = uygunSaat.Value.ToString(@"hh\:mm"),
+                                OgretimGorevlisi = ders.OgretimGorevlisi,
+                                BolumAd = ders.Bolum?.BolumAd ?? "BÖLÜM",
+                                Salon = salon.DerslikAd,
+                                SinavSuresi = ders.SinavSuresi,
+                                OgrenciIdListesi = ogrenciler
+                            });
 
-                                if (ogrenciCakisiyorMu) continue;
-
-                                var doluSalonlar = tumDerslikler
-                                    .Where(salon => sinavProgrami.Any(sp =>
-                                        sp.Tarih == tarih &&
-                                        sp.Salon == salon.DerslikAd &&
-                                        SaatlerCakisiyorMu(sp.Saat, sp.SinavSuresi, saat, ders.SinavSuresi, beklemeSuresi)
-                                    ))
-                                    .ToList();
-
-                                var bosSalonlar = tumDerslikler
-                                    .Where(salon => !doluSalonlar.Any(d => d.DerslikAd == salon.DerslikAd))
-                                    .OrderByDescending(s => s.Kapasite)
-                                    .ToList();
-
-                                if (!bosSalonlar.Any()) continue;
-
-                                int toplamKapasite = 0;
-                                var kullanilacakSalonlarTemp = new List<Derslikler>();
-                                foreach (var salon in bosSalonlar)
-                                {
-                                    kullanilacakSalonlarTemp.Add(salon);
-                                    toplamKapasite += salon.Kapasite;
-                                    if (toplamKapasite >= ogrenciIdListesi.Count) break;
-                                }
-
-                                if (toplamKapasite >= ogrenciIdListesi.Count)
-                                {
-                                    uygunSaat = saat;
-                                    kullanilacakSalonlar = kullanilacakSalonlarTemp;
-                                    break;
-                                }
-                            }
-
-                            int toplamKapasiteSalonlar = kullanilacakSalonlar?.Sum(s => s.Kapasite) ?? 0;
-                            if (uygunSaat == null || kullanilacakSalonlar == null || toplamKapasiteSalonlar < ogrenciIdListesi.Count)
-                            {
-                                hataListesi.Add($"Ders {ders.DersAdi} ({ders.Bolum?.BolumAd ?? "Bölüm"}): Uygun salon bulunamadı! ÖğrenciSayısı={ogrenciIdListesi.Count}, ToplamKapasite={toplamKapasiteSalonlar}");
-                            }
-                            else
-                            {
-                                int ogrenciIndex = 0;
-                                foreach (var salon in kullanilacakSalonlar)
-                                {
-                                    int kapasite = salon.Kapasite;
-                                    var ogrenciler = ogrenciIdListesi.Skip(ogrenciIndex).Take(kapasite).ToList();
-                                    ogrenciIndex += ogrenciler.Count;
-
-                                    sinavProgrami.Add(new SinavKaydi
-                                    {
-                                        DersId = ders.DersId,
-                                        DersAdi = ders.DersAdi,
-                                        Tarih = tarih,
-                                        Saat = uygunSaat.Value.ToString(@"hh\:mm"),
-                                        OgretimGorevlisi = ders.OgretimGorevlisi,
-                                        BolumAd = ders.Bolum?.BolumAd ?? "BÖLÜM",
-                                        Salon = salon.DerslikAd,
-                                        SinavSuresi = ders.SinavSuresi,
-                                        OgrenciIdListesi = ogrenciler
-                                    });
-
-                                    if (ogrenciIndex >= ogrenciIdListesi.Count) break;
-                                }
-                            }
+                            if (ogrenciIndex >= ogrenciIdListesi.Count) break;
                         }
                     }
+                    else
+                    {
+                        hataListesi.Add($"Ders {ders.DersAdi} ({ders.Bolum?.BolumAd ?? "Bölüm"}): Uygun salon veya saat bulunamadı! ÖğrenciSayısı={ogrenciIdListesi.Count}");
+                    }
                 }
-
-                if (hataListesi.Any())
-                {
-                    MessageBox.Show(string.Join("\n", hataListesi), "Hatalar", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-
-                SinavProgramiDataGrid.ItemsSource = sinavProgrami;
-                _olusturulanProgram = sinavProgrami;
-                ExcelIndirButton.Visibility = Visibility.Visible;
-
-                MessageBox.Show("Sınav programı başarıyla oluşturuldu!");
-                
-                if (_olusturulanProgram.Any())
-                {
-                    SinavProgramiOlusturuldu?.Invoke(_olusturulanProgram);
-                }
-                
-                var mainWindow = Application.Current.Windows.OfType<MainPanelWindow>().FirstOrDefault();
-                if (mainWindow != null && _olusturulanProgram.Any())
-                {
-                    var secilenSinav = _olusturulanProgram.First(); // Örnek olarak ilk sınav
-                    var ogrenciListesi = secilenSinav.OgrenciIdListesi
-                        .Select(id => _context.Ogrenciler.First(o => o.OgrenciId == id))
-                        .ToList();
-
-                    // MainPanelWindow'a ata
-                    mainWindow.SonOluşturulanSinav = secilenSinav;
-                    mainWindow.SonSinavOgrencileri = ogrenciListesi;
-
-                    // Oturma Planı butonunu görünür yap
-                    mainWindow.OturmaPlaniButton.Visibility = Visibility.Visible;
-                }
-
-                
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Bir hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        if (hataListesi.Any())
+        {
+            MessageBox.Show(string.Join("\n", hataListesi), "Hatalar", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        SinavProgramiDataGrid.ItemsSource = sinavProgrami;
+        _olusturulanProgram = sinavProgrami;
+        ExcelIndirButton.Visibility = Visibility.Visible;
+
+        MessageBox.Show("Sınav programı başarıyla oluşturuldu!");
+
+        SinavProgramiOlusturuldu?.Invoke(_olusturulanProgram);
+
+        var mainWindow = Application.Current.Windows.OfType<MainPanelWindow>().FirstOrDefault();
+        if (mainWindow != null && _olusturulanProgram.Any())
+        {
+            var secilenSinav = _olusturulanProgram.First();
+            var ogrenciListesi = secilenSinav.OgrenciIdListesi
+                .Select(id => _context.Ogrenciler.First(o => o.OgrenciId == id))
+                .ToList();
+
+            mainWindow.SonOluşturulanSinav = secilenSinav;
+            mainWindow.SonSinavOgrencileri = ogrenciListesi;
+            mainWindow.OturmaPlaniButton.Visibility = Visibility.Visible;
+        }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Bir hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+}
+
 
         private bool SaatlerCakisiyorMu(string mevcutSaatStr, int mevcutSure, TimeSpan yeniBaslangic, int yeniSure, int bekleme)
         {
