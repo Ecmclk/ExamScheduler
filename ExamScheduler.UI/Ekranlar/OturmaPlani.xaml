@@ -57,6 +57,47 @@
             </Setter>
         </Style>
 
+        <!-- Secondary Button Style (PDF için) -->
+        <Style TargetType="Button" x:Key="SecondaryButton">
+            <Setter Property="Background" Value="#6366F1"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinWidth" Value="160"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <StackPanel Orientation="Horizontal" 
+                                        HorizontalAlignment="Center" 
+                                        VerticalAlignment="Center"
+                                        Margin="16,0">
+                                <TextBlock Text="📄" 
+                                           FontSize="16" 
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"/>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#4F46E5"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#4338CA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Derslik Toggle Button Style -->
         <Style x:Key="DerslikButton" TargetType="ToggleButton">
             <Setter Property="Background" Value="White"/>
@@ -173,7 +214,6 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <!-- Sınav Listesi Kartı -->
@@ -239,8 +279,8 @@
                                        Foreground="#1F2937"
                                        Margin="0,0,0,20"/>
                             
-                            <!-- Derslik Filtre Butonları -->
-                          <Border Background="White" 
+                            <!-- Derslik Seçimi ve PDF İndirme Birleşik Panel -->
+                            <Border Background="White" 
                                     CornerRadius="16" 
                                     Padding="24,20"
                                     Margin="0,0,0,24"
@@ -251,13 +291,14 @@
                                                     ShadowDepth="0" Opacity="0.05"/>
                                 </Border.Effect>
                                 <StackPanel>
-                                    <!-- Başlık Kısmı -->
+                                    <!-- Başlık ve PDF Butonu -->
                                     <Grid Margin="0,0,0,16">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         
+                                        <!-- Sol Taraf: Başlık -->
                                         <StackPanel Orientation="Horizontal" Grid.Column="0">
                                             <Border Background="#ECFDF5" 
                                                     CornerRadius="10" 
@@ -274,12 +315,25 @@
                                                            FontSize="15" 
                                                            FontWeight="Bold"
                                                            Foreground="#1F2937"/>
-                                                <TextBlock Text="Görüntülemek istediğiniz dersliği seçin" 
+                                                <TextBlock Text="Görüntülemek ve indirmek istediğiniz dersliği seçin" 
                                                            FontSize="11" 
                                                            Foreground="#9CA3AF"
                                                            Margin="0,2,0,0"/>
                                             </StackPanel>
                                         </StackPanel>
+                                        
+                                        <!-- Sağ Taraf: PDF İndir Butonu -->
+                                        <Button x:Name="PDFIndirButton" 
+                                                Grid.Column="1"
+                                                Content="PDF İndir" 
+                                                Style="{StaticResource SecondaryButton}"
+                                                VerticalAlignment="Center"
+                                                Click="PDFIndirButton_Click">
+                                            <Button.Effect>
+                                                <DropShadowEffect Color="#6366F1" BlurRadius="12" 
+                                                                ShadowDepth="0" Opacity="0.25"/>
+                                            </Button.Effect>
+                                        </Button>
                                     </Grid>
                                     
                                     <!-- Ayırıcı Çizgi -->
@@ -287,15 +341,13 @@
                                             Background="#F3F4F6" 
                                             Margin="0,0,0,16"/>
                                     
-                                    <!-- Butonlar -->
+                                    <!-- Derslik Butonları -->
                                     <WrapPanel x:Name="DerslikButonPanel" 
                                                Orientation="Horizontal"
                                                Margin="10">
-                                   
-                                    
-                                    <WrapPanel.Resources>
+                                        <WrapPanel.Resources>
                                             <Style TargetType="Button">
-                                                <Setter Property="Background" Value="#6366F1"/>
+                                                <Setter Property="Background" Value="#10B981"/>
                                                 <Setter Property="Foreground" Value="White"/>
                                                 <Setter Property="BorderThickness" Value="0"/>
                                                 <Setter Property="Padding" Value="20,10"/>
@@ -303,27 +355,65 @@
                                                 <Setter Property="FontSize" Value="14"/>
                                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                                 <Setter Property="Cursor" Value="Hand"/>
-                                                <Setter Property="Effect">
+                                                <Setter Property="Template">
                                                     <Setter.Value>
-                                                        <DropShadowEffect ShadowDepth="2" BlurRadius="10" Opacity="0.3" Color="#6366F1"/>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border x:Name="border"
+                                                                    Background="{TemplateBinding Background}"
+                                                                    CornerRadius="10"
+                                                                    BorderBrush="#059669"
+                                                                    BorderThickness="2">
+                                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                                VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#059669"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsPressed" Value="True">
+                                                                    <Setter Property="Background" Value="#047857"/>
+                                                                </Trigger>
+                                                                <Trigger Property="Tag" Value="Selected">
+                                                                    <Setter TargetName="border" Property="BorderBrush" Value="#F59E0B"/>
+                                                                    <Setter TargetName="border" Property="BorderThickness" Value="3"/>
+                                                                    <Setter Property="Effect">
+                                                                        <Setter.Value>
+                                                                            <DropShadowEffect Color="#F59E0B" BlurRadius="15" 
+                                                                                            ShadowDepth="0" Opacity="0.4"/>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
                                                     </Setter.Value>
                                                 </Setter>
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#4F46E5"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsPressed" Value="True">
-                                                        <Setter Property="Background" Value="#4338CA"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
                                             </Style>
                                         </WrapPanel.Resources>
-                                    
                                     </WrapPanel>
                                     
+                                    <!-- Bilgilendirme Mesajı -->
+                                    <Border Background="#FEF3C7" 
+                                            BorderBrush="#FCD34D"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="12,8"
+                                            Margin="10,8,10,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="💡" 
+                                                       FontSize="14"
+                                                       Margin="0,0,8,0"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Text="PDF indirme seçili derslik için yapılacaktır" 
+                                                       FontSize="12"
+                                                       Foreground="#92400E"
+                                                       FontWeight="Medium"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
                             </Border>
                             
+                            <!-- Oturma Planı Görünümü -->
                             <Border Style="{StaticResource PlanViewCard}">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" 
                                               HorizontalScrollBarVisibility="Auto"
@@ -335,27 +425,6 @@
                                                 Margin="20"/>
                                 </ScrollViewer>
                             </Border>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- PDF İndir Butonu -->
-                    <Border Style="{StaticResource ModernCard}" Grid.Row="2">
-                        <StackPanel>
-                            <TextBlock Text="💾 Dışa Aktar" 
-                                       FontSize="16" 
-                                       FontWeight="SemiBold" 
-                                       Foreground="#1F2937"
-                                       Margin="0,0,0,15"/>
-                            <TextBlock Text="Oturma planını PDF formatında kaydedin" 
-                                       FontSize="13" 
-                                       Foreground="#6B7280"
-                                       Margin="0,0,0,15"/>
-                            
-                            <Button x:Name="PDFIndirButton" 
-                                    Content="📄 PDF Olarak İndir" 
-                                    Style="{StaticResource PrimaryButton}"
-                                    HorizontalAlignment="Left"
-                                    Click="PDFIndirButton_Click"/>
                         </StackPanel>
                     </Border>
                 </Grid>

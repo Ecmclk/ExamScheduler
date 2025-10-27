@@ -1,19 +1,27 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using ExamScheduler.Data;
 using ExamScheduler.Models.Models;
-using iText.Kernel.Pdf;
-using iText.Layout;
-using iText.Layout.Borders;
-using iText.Layout.Element;
-using iText.Layout.Properties;
+using iText.IO.Font;
+
+using iText.IO.Image;
+
 using Microsoft.Win32;
 using Border = System.Windows.Controls.Border;
 using Color = System.Windows.Media.Color;
+using FontWeights = System.Windows.FontWeights;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using Image = iText.Layout.Element.Image;
 using TextAlignment = System.Windows.TextAlignment;
 using VerticalAlignment = System.Windows.VerticalAlignment;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.IO.Font.Constants;
+using iText.Kernel.Font;
 
 namespace ExamScheduler.UI.Ekranlar
 {
@@ -79,8 +87,11 @@ namespace ExamScheduler.UI.Ekranlar
                     Content = derslikAd,
                     Margin = new Thickness(5),
                     Padding = new Thickness(10, 5, 10, 5),
-                    Tag = grup.ToList() // Grup içindeki sınav kayıtlarını butona ekle
+                    Tag = new { Derslik = derslik, Sinavlar = grup.ToList() }
                 };
+                
+                
+
 
                 btn.Click += DerslikButton_Click;
                 DerslikButonPanel.Children.Add(btn);
@@ -89,38 +100,41 @@ namespace ExamScheduler.UI.Ekranlar
         private void DerslikButton_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
-            if (btn == null) return;
+            if (btn == null || btn.Tag == null) return;
 
-            var grup = btn.Tag as List<SinavKaydi>;
-            if (grup == null || !grup.Any()) return;
+            // Tag aslında bir anonim tip olacak şekilde atanmalı
+            // Örn: btn.Tag = new { Derslik = derslik, Sinavlar = grup.ToList() };
+            var tagType = btn.Tag.GetType();
+
+            var derslik = tagType.GetProperty("Derslik")?.GetValue(btn.Tag) as Derslikler;
+            var sinavlar = tagType.GetProperty("Sinavlar")?.GetValue(btn.Tag) as List<SinavKaydi>;
+
+            if (derslik == null || sinavlar == null) return;
 
             OturmaAlani.Children.Clear();
 
-            // Derslik bilgisi
-            var derslikAd = grup.First().Salon;
-            var derslik = _context.Derslikler.FirstOrDefault(d => d.DerslikAd == derslikAd);
-            if (derslik == null) return;
-
-            var ogrenciListesi = grup
+            var ogrenciler = sinavlar
                 .SelectMany(s => s.OgrenciIdListesi)
                 .Select(id => _context.Ogrenciler.FirstOrDefault(o => o.OgrenciId == id))
                 .Where(o => o != null)
                 .ToList();
 
-            // Başlık
-            var baslikText = new TextBlock
+            OturmaAlani.Children.Add(new TextBlock
             {
                 Text = $"Derslik: {derslik.DerslikAd}",
-                FontSize = 14,
+                FontSize = 16,
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 8, 0, 8),
                 HorizontalAlignment = HorizontalAlignment.Center
-            };
-            OturmaAlani.Children.Add(baslikText);
+            });
 
-            // Oturma düzenini çiz
-            CizOturmaDuzeni(derslik, ogrenciListesi);
+            CizOturmaDuzeni(derslik, ogrenciler);
+
+            PDFIndirButton.Visibility = Visibility.Visible;
+            PDFIndirButton.Tag = new { Derslik = derslik, Ogrenciler = ogrenciler };
         }
+
+
 
 
         private void CizOturmaDuzeni(Derslikler derslik, List<Ogrenciler> ogrenciListesi)
@@ -232,147 +246,134 @@ namespace ExamScheduler.UI.Ekranlar
         }
 
 
-
-
-
-
-
-    private void PDFIndirButton_Click(object sender, RoutedEventArgs e)
-{
-    if (SinavListBox.SelectedItem == null)
+        
+         private void PDFIndirButton_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("Önce bir sınav seçin!");
-        return;
-    }
+        if (PDFIndirButton.Tag == null) return;
 
-    var secilen = SinavListBox.SelectedItem;
-    int dersId = (int)secilen.GetType().GetProperty("DersId").GetValue(secilen);
-
-    var secilenSinavlar = _sinavProgrami.Where(s => s.DersId == dersId).ToList();
-    if (!secilenSinavlar.Any()) return;
-
-    var saveDialog = new SaveFileDialog
-    {
-        Filter = "PDF Dosyası (*.pdf)|*.pdf",
-        Title = "Oturma Planını Kaydet",
-        FileName = $"OturmaPlani_{dersId}.pdf"
-    };
-
-    if (saveDialog.ShowDialog() != true) return;
-    string filePath = saveDialog.FileName;
-
-    try
-    {
-        using var writer = new PdfWriter(filePath);
-        using var pdf = new PdfDocument(writer);
-        using var document = new Document(pdf);
-
-        var derslikGruplari = secilenSinavlar.GroupBy(s => s.Salon);
-
-        foreach (var grup in derslikGruplari)
+        dynamic tagData = PDFIndirButton.Tag;
+        var derslik = tagData.Derslik as Derslikler;
+        var ogrenciler = tagData.Ogrenciler as List<Ogrenciler>;
+        var secilenDers = SinavListBox.SelectedItem;
+        string dersAdi = secilenDers.GetType().GetProperty("DersAdi").GetValue(secilenDers)?.ToString();
+        
+        var saveFileDialog = new SaveFileDialog
         {
-            var derslikAd = grup.Key;
-            var derslik = _context.Derslikler.FirstOrDefault(d => d.DerslikAd == derslikAd);
-            if (derslik == null) continue;
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+            Filter = "PDF Dosyası (*.pdf)|*.pdf",
+            FileName = $"OturmaPlani_{dersAdi}_{derslik.DerslikAd}.pdf"
+        };
 
-            // Öğrenci listesi
-            var ogrenciListesi = grup
-                .SelectMany(s => s.OgrenciIdListesi)
-                .Select(id => _context.Ogrenciler.FirstOrDefault(o => o.OgrenciId == id))
-                .Where(o => o != null)
-                .ToList();
+        if (saveFileDialog.ShowDialog() != true) return;
+       
+        // Font dosya yolu
+        string fontPath = @"C:\Users\Ecem\RiderProjects\ExamScheduler\Font\NotoSans-VariableFont_wdth,wght.ttf";
+        var font = PdfFontFactory.CreateFont(fontPath, PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
 
-            if (!ogrenciListesi.Any()) continue;
+        
+      
+        
+        using (var writer = new PdfWriter(saveFileDialog.FileName))
+        using (var pdf = new PdfDocument(writer))
+        using (var document = new Document(pdf))
+        {
+            var boldFont = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
 
-            document.Add(new Paragraph($"Oturma Planı - {derslik.DerslikAd}")
-                .SetFontSize(16)
+            document.Add(new Paragraph($"🪑 Oturma Planı - {derslik.DerslikAd}")
                 .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                .SetMarginBottom(10));
+                .SetFontSize(18)
+                .SetFont(boldFont)
+                .SetMarginBottom(15));
 
-            // Tablo: Ad / Numara / Sıra / Sütun
-            var table = new Table(UnitValue.CreatePercentArray(new float[] { 3, 2, 1, 1 }))
-                .UseAllAvailableWidth();
+            // UI görselini PDF'e ekle
+            if (OturmaAlani.ActualWidth > 0 && OturmaAlani.ActualHeight > 0)
+            {
+                OturmaAlani.UpdateLayout();
+                OturmaAlani.Measure(new Size(OturmaAlani.ActualWidth, OturmaAlani.ActualHeight));
+                OturmaAlani.Arrange(new Rect(new Size(OturmaAlani.ActualWidth, OturmaAlani.ActualHeight)));
 
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Adı / Soyadı")));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Numarası")));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Sıra")));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Sütun")));
+                int w = (int)(OturmaAlani.ActualWidth * 2);
+                int h = (int)(OturmaAlani.ActualHeight * 2);
 
-            // Matris
-            Ogrenciler?[, ,] ogrenciMatris = new Ogrenciler?[derslik.BoyunaSira, derslik.EnineSira, derslik.SiraYapisi];
-            bool[,,] doluMatris = new bool[derslik.BoyunaSira, derslik.EnineSira, derslik.SiraYapisi];
+                RenderTargetBitmap rtb = new RenderTargetBitmap(w, h, 192, 192, PixelFormats.Pbgra32);
+                rtb.Render(OturmaAlani);
+
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(rtb));
+
+                string tempFile = Path.GetTempFileName() + ".png";
+                using (var fs = new FileStream(tempFile, FileMode.Create))
+                {
+                    encoder.Save(fs);
+                }
+
+                var pdfImage = new Image(ImageDataFactory.Create(tempFile))
+                    .SetWidth(pdf.GetDefaultPageSize().GetWidth() - 40)
+                    .SetAutoScaleHeight(true)
+                    .SetMarginTop(5);
+
+                document.Add(pdfImage);
+                document.Add(new Paragraph("\n"));
+            }
+
+            // Öğrenci tablosu ekle (CizOturmaDuzeni ile aynı düzeni kullan)
+            var table = new Table(5).UseAllAvailableWidth();
+            table.AddHeaderCell("No");
+            table.AddHeaderCell("Öğrenci No");
+            table.AddHeaderCell("Ad Soyad");
+            table.AddHeaderCell("Sıra");
+            table.AddHeaderCell("Sütun");
+
             int ogrenciIndex = 0;
+            int genelSayac = 1;
+            bool[,,] doluMatris = new bool[derslik.BoyunaSira, derslik.EnineSira, derslik.SiraYapisi];
+            
+        
 
-            for (int i = 0; i < derslik.BoyunaSira && ogrenciIndex < ogrenciListesi.Count; i++)
-            {
-                for (int j = 0; j < derslik.EnineSira && ogrenciIndex < ogrenciListesi.Count; j++)
-                {
-                    for (int k = 0; k < derslik.SiraYapisi && ogrenciIndex < ogrenciListesi.Count; k++)
-                    {
-                        bool yanYanaVar = (k > 0 && doluMatris[i, j, k - 1]) ||
-                                          (k == 0 && j > 0 && doluMatris[i, j - 1, derslik.SiraYapisi - 1]);
-                        if (!yanYanaVar)
-                        {
-                            ogrenciMatris[i, j, k] = ogrenciListesi[ogrenciIndex++];
-                            doluMatris[i, j, k] = true;
-                        }
-                    }
-                }
-            }
 
-            // Kalan öğrenciler
-            while (ogrenciIndex < ogrenciListesi.Count)
-            {
-                bool yerlesmeVar = false;
-                for (int i = 0; i < derslik.BoyunaSira && ogrenciIndex < ogrenciListesi.Count; i++)
-                {
-                    for (int j = 0; j < derslik.EnineSira && ogrenciIndex < ogrenciListesi.Count; j++)
-                    {
-                        for (int k = 0; k < derslik.SiraYapisi && ogrenciIndex < ogrenciListesi.Count; k++)
-                        {
-                            if (!doluMatris[i, j, k])
-                            {
-                                ogrenciMatris[i, j, k] = ogrenciListesi[ogrenciIndex++];
-                                doluMatris[i, j, k] = true;
-                                yerlesmeVar = true;
-                            }
-                        }
-                    }
-                }
-                if (!yerlesmeVar) break;
-            }
 
-            // PDF tablosuna ekle
             for (int i = 0; i < derslik.BoyunaSira; i++)
             {
                 for (int j = 0; j < derslik.EnineSira; j++)
                 {
                     for (int k = 0; k < derslik.SiraYapisi; k++)
                     {
-                        var ogr = ogrenciMatris[i, j, k];
-                        if (ogr != null)
+                        bool yanYanaVar = false;
+                        if (k > 0 && doluMatris[i, j, k - 1]) yanYanaVar = true;
+                        if (k == 0 && j > 0 && doluMatris[i, j - 1, derslik.SiraYapisi - 1]) yanYanaVar = true;
+
+                        bool onArkaVar = false;
+                        if (i > 0 && doluMatris[i - 1, j, k]) onArkaVar = true;
+
+                        if (!yanYanaVar && (i == 0 || onArkaVar) && ogrenciIndex < ogrenciler.Count)
                         {
-                            table.AddCell(ogr.AdSoyad ?? "-");
-                            table.AddCell(ogr.OgrenciNo ?? "-");
-                            table.AddCell((i + 1).ToString());
-                            table.AddCell($"{j + 1}-{k + 1}");
+                            var ogr = ogrenciler[ogrenciIndex++];
+                            doluMatris[i, j, k] = true;
+
+                            table.AddCell(new Cell().Add(new Paragraph(genelSayac.ToString())).SetFont(font));
+                            table.AddCell(new Cell().Add(new Paragraph(ogr.OgrenciNo ?? "-")).SetFont(font));
+                            table.AddCell(new Cell().Add(new Paragraph(ogr.AdSoyad ?? "-")).SetFont(font));
+                            table.AddCell(new Cell().Add(new Paragraph($"Sıra {i + 1}")).SetFont(font));
+                            table.AddCell(new Cell().Add(new Paragraph($"Sütun {j + 1}")).SetFont(font));
+
+                            genelSayac++;
                         }
                     }
                 }
             }
 
             document.Add(table);
-            document.Add(new Paragraph("\n"));
+            document.Close();
         }
 
-        document.Close();
-        MessageBox.Show("PDF başarıyla oluşturuldu!");
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show($"PDF oluşturulurken hata oluştu: {ex.Message}");
-    }
+        MessageBox.Show("Oturma planı PDF olarak başarıyla kaydedildi.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
 }
+
+
+   
+    
+    
+
 
 
 
