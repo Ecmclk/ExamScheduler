@@ -14,14 +14,18 @@ namespace ExamScheduler.UI.Ekranlar
         private readonly DersService _dersService;
         private readonly OgrenciService _ogrenciService;
         private readonly AppDbContext _context;
+        private readonly int _kullaniciRol;
+        private readonly int? _kullaniciBolumId;
 
         private List<SinavKaydi> _olusturulanProgram;
 
-        public SinavProgramiOlustur(AppDbContext context)
+        public SinavProgramiOlustur(AppDbContext context,int kullaniciRol, int? kullaniciBolumId = null)
         {
             InitializeComponent();
 
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _kullaniciRol = kullaniciRol;
+            _kullaniciBolumId = kullaniciBolumId;
 
             _dersService = new DersService(_context);
             _ogrenciService = new OgrenciService(_context);
@@ -48,32 +52,48 @@ namespace ExamScheduler.UI.Ekranlar
 
         private async Task<List<Bolumler>> LoadBolumlerAsync()
         {
-            // Yeni context kullanıyoruz
             using var context = new AppDbContext();
-
             var bolumler = await context.Bolumler.ToListAsync();
-            BolumComboBox.ItemsSource = bolumler;
-            BolumComboBox.DisplayMemberPath = "BolumAd";
-            BolumComboBox.SelectedValuePath = "BolumId";
 
-            if (bolumler.Any())
+            if (_kullaniciRol == 1) // Admin
             {
-                var defaultBolum = bolumler.FirstOrDefault(b => b.BolumAd.Contains("Bilgisayar Mühendisligi"));
-                BolumComboBox.SelectedValue = defaultBolum?.BolumId ?? bolumler.First().BolumId;
+                bolumler.Insert(0, new Bolumler { BolumId = 0, BolumAd = "Tüm Bölümler" });
+                BolumComboBox.ItemsSource = bolumler;
+                BolumComboBox.DisplayMemberPath = "BolumAd";
+                BolumComboBox.SelectedValuePath = "BolumId";
+                BolumComboBox.SelectedIndex = 0;
+                BolumComboBox.IsEnabled = true;
+            }
+            else // Bölüm koordinatörü
+            {
+                var kendiBolumu = bolumler.FirstOrDefault(b => b.BolumId == _kullaniciBolumId);
+                if (kendiBolumu != null)
+                {
+                    BolumComboBox.ItemsSource = new List<Bolumler> { kendiBolumu };
+                    BolumComboBox.DisplayMemberPath = "BolumAd";
+                    BolumComboBox.SelectedValuePath = "BolumId";
+                    BolumComboBox.SelectedIndex = 0;
+                    BolumComboBox.IsEnabled = false;
+                }
+                else
+                {
+                    MessageBox.Show("Kullanıcının kayıtlı olduğu bölüm bulunamadı.", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
 
-            ProgramiOlusturButton.IsEnabled = true;
-            return bolumler; // tekrar DB çağrısı yok
+            return bolumler;
         }
 
         private async Task LoadDerslerAsync()
         {
-            using var context = new AppDbContext();
-            var dersService = new DersService(context);
+            int seciliBolumId = _kullaniciBolumId ?? 0;
 
-            var dersler = await dersService.GetAllDerslerAsync();
+            var dersler = await _dersService.GetAllDerslerAsync();
+            var filtreliDersler = dersler
+                .Where(d => d.BolumId == seciliBolumId)
+                .ToList();
 
-            var dersViewModel = dersler.Select(d => new Dersler
+            var dersViewModel = filtreliDersler.Select(d => new Dersler
             {
                 DersId = d.DersId,
                 DersAdi = d.DersAdi,
@@ -88,6 +108,7 @@ namespace ExamScheduler.UI.Ekranlar
             DersListBox.ItemsSource = dersViewModel;
         }
 
+
         private bool _isLoadingDersler = false;
 
         private async void BolumComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -97,30 +118,30 @@ namespace ExamScheduler.UI.Ekranlar
             _isLoadingDersler = true;
             try
             {
-                if (BolumComboBox.SelectedItem is null) return;
-
-                int seciliBolumId = (int)BolumComboBox.SelectedValue;
+                if (BolumComboBox.SelectedItem is not Bolumler seciliBolum)
+                    return;
 
                 using var context = new AppDbContext();
                 var dersService = new DersService(context);
                 var dersler = await dersService.GetAllDerslerAsync();
 
-                var filtreliDersler = dersler
-                    .Where(d => d.BolumId == seciliBolumId)
-                    .Select(d => new Dersler
-                    {
-                        DersId = d.DersId,
-                        DersAdi = d.DersAdi,
-                        Sinif = d.Sinif,
-                        OgretimGorevlisi = d.OgretimGorevlisi,
-                        Secili = true,
-                        SinavSuresi = d.SinavSuresi > 0 ? d.SinavSuresi : 75,
-                        BolumId = d.BolumId,
-                        Bolum = d.Bolum
-                    })
-                    .ToList();
+                var filtreliDersler = (seciliBolum.BolumId == 0)
+                    ? dersler // "Tüm Bölümler" seçildiyse hepsini getir
+                    : dersler.Where(d => d.BolumId == seciliBolum.BolumId).ToList();
 
-                DersListBox.ItemsSource = filtreliDersler;
+                var dersViewModel = filtreliDersler.Select(d => new Dersler
+                {
+                    DersId = d.DersId,
+                    DersAdi = d.DersAdi,
+                    Sinif = d.Sinif,
+                    OgretimGorevlisi = d.OgretimGorevlisi,
+                    Secili = true,
+                    SinavSuresi = d.SinavSuresi > 0 ? d.SinavSuresi : 75,
+                    BolumId = d.BolumId,
+                    Bolum = d.Bolum
+                }).ToList();
+
+                DersListBox.ItemsSource = dersViewModel;
             }
             catch (Exception ex)
             {

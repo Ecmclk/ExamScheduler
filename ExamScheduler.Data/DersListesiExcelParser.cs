@@ -4,14 +4,10 @@ using ExamScheduler.Models.Models;
 
 namespace ExamScheduler.Data.Parsers
 {
-    /// <summary>
-    /// Ders Listesi Yükleme İşlemi
-    /// Yetki: Yalnızca Bölüm Koordinatörü erişebilir.
-    /// ⚠️ NOT: Yetki kontrolü UI veya Controller katmanında yapılmalıdır.
-    /// </summary>
+  
     public class DersListesiExcelParser : IExcelParser<Dersler>
     {
-        public async Task<ParseResult<Dersler>> ParseAsync(string filePath)
+        public async Task<ParseResult<Dersler>> ParseAsync(string filePath,int bolumId)
         {
             var result = new ParseResult<Dersler>();
 
@@ -103,7 +99,7 @@ namespace ExamScheduler.Data.Parsers
                                 OgretimGorevlisi = ogretimGorevlisi,
                                 Sinif = (byte)currentClassLevel,
                                 DersTuru = isElective ? "Seçmeli" : "Zorunlu",
-                                BolumId = 1
+                                BolumId = bolumId
                             });
                         }
                         catch (Exception ex)

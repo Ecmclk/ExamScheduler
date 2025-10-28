@@ -208,7 +208,20 @@
                                FontSize="14"
                                Margin="0,0,0,40"
                                Foreground="#6B7280"/>
-
+                    <!-- Uyarı Mesajı -->
+                    <Border x:Name="UyariBorder" 
+                            Background="#FEE2E2" 
+                            CornerRadius="8"
+                            Padding="12"
+                            Margin="0,0,0,20"
+                            Visibility="Collapsed">
+                        <TextBlock x:Name="UyariText"
+                                   Text=""
+                                   Foreground="#DC2626"
+                                   FontWeight="Medium"
+                                   TextWrapping="Wrap"
+                                   FontSize="13"/>
+                    </Border>
                     <!-- E-posta -->
                     <TextBlock Text="E-posta Adresi" 
                                FontWeight="SemiBold" 
@@ -242,27 +255,15 @@
                         </Button.Effect>
                     </Button>
 
-                    <!-- Test Kullanıcı Butonu -->
+                    <!-- Test Kullanıcı Butonu 
+
                     <Button Content="🔧 Test Kullanıcı Ekle"
                             Height="42"
                             Style="{StaticResource SecondaryButton}"
                             Margin="0,15,0,0"
-                            Click="TestUserEkleButton_Click"/>
+                            Click="TestUserEkleButton_Click"/>  -->
+                 
 
-                    <!-- Uyarı Mesajı -->
-                    <Border x:Name="UyariBorder" 
-                            Background="#FEE2E2" 
-                            CornerRadius="8"
-                            Padding="12"
-                            Margin="0,25,0,0"
-                            Visibility="Collapsed">
-                        <TextBlock x:Name="UyariText"
-                                   Text=""
-                                   Foreground="#DC2626"
-                                   FontWeight="Medium"
-                                   TextWrapping="Wrap"
-                                   FontSize="13"/>
-                    </Border>
                 </StackPanel>
             </Border>
         </Grid>

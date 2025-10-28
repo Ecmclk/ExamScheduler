@@ -113,16 +113,17 @@
                     <StackPanel>
                         <Button Content="📊 Kontrol Paneli" Click="KontrolPaneliButton_Click"
                                 Style="{StaticResource NavButtonStyle}"/>
+                        <Button Content="🚪 Derslik Yönetimi" Click="DerslikButton_Click"
+                                Style="{StaticResource NavButtonStyle}"/>
                         <Button Content="🏫 Bölüm Yönetimi" Click="BolumButton_Click"
                                 Style="{StaticResource NavButtonStyle}"/>
-                        <Button Content="📚 Ders Yönetimi" Click="DersButton_Click"
+                        <Button x:Name="DersButton" Content="📚 Ders Yönetimi" Click="DersButton_Click"
                                 Style="{StaticResource NavButtonStyle}"/>
-                        <Button Content="👥 Öğrenci Yönetimi" Click="OgrenciButton_Click"
+                        <Button x:Name="OgrenciButton" Content="👥 Öğrenci Yönetimi" Click="OgrenciButton_Click"
                                 Style="{StaticResource NavButtonStyle}"/>
                         <Button Content="🔐 Kullanıcı Yönetimi" Click="KullaniciButton_Click"
                                 Style="{StaticResource NavButtonStyle}"/>
-                        <Button Content="🚪 Derslik Yönetimi" Click="DerslikButton_Click"
-                                Style="{StaticResource NavButtonStyle}"/>
+                        
                         <Button x:Name="SinavProgramiButton" 
                                 Content="📅 Sınav Programı Oluştur" 
                                 Click="SinavProgrami_Click" 

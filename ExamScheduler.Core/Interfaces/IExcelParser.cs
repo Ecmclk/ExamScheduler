@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace ExamScheduler.Core.Interfaces
 {
     public interface IExcelParser<T>
-    {
-        Task<ParseResult<T>> ParseAsync(string filePath);
+    { Task<ParseResult<T>> ParseAsync(string filePath, int bolumId);
+    
     }
 
     public class ParseResult<T>

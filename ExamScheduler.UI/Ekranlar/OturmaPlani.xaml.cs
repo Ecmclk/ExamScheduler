@@ -172,9 +172,10 @@ namespace ExamScheduler.UI.Ekranlar
 
 
 
-
+        private List<(Ogrenciler ogr, int Sira, int Sutun, int KoltukNo)> KoltukAtamaListesi = new();
         private void CizOturmaDuzeni(Derslikler derslik, List<Ogrenciler> ogrenciListesi)
-{
+{    KoltukAtamaListesi.Clear();
+
     if (derslik.EnineSira <= 0 || derslik.BoyunaSira <= 0)
     {
         MessageBox.Show("Geçerli sıra bilgisi bulunamadı.", "Uyarı", MessageBoxButton.OK,
@@ -242,6 +243,8 @@ namespace ExamScheduler.UI.Ekranlar
                     textStr = $"{koltukNo}\n{ogr.OgrenciNo}\n{ogr.AdSoyad}";
                     doluMatris[i, j, k] = true;
                     sira.Background = Brushes.LightBlue;
+                    
+                    KoltukAtamaListesi.Add((ogr, j + 1, i + 1, koltukNo));
                 }
                 else
                 {
@@ -289,127 +292,114 @@ namespace ExamScheduler.UI.Ekranlar
 
 
         
-         private void PDFIndirButton_Click(object sender, RoutedEventArgs e)
+        private void PDFIndirButton_Click(object sender, RoutedEventArgs e)
+{
+    
+    if (PDFIndirButton.Tag == null) return;
+
+    dynamic tagData = PDFIndirButton.Tag;
+    var derslik = tagData.Derslik as Derslikler;
+    var ogrenciler = tagData.Ogrenciler as List<Ogrenciler>; // sadece o derslik
+
+    string dersAdi = SinavListBox.SelectedItem
+        .GetType()
+        .GetProperty("DersAdi")
+        .GetValue(SinavListBox.SelectedItem)?
+        .ToString();
+
+
+    var saveFileDialog = new SaveFileDialog
     {
-        if (PDFIndirButton.Tag == null) return;
+        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+        Filter = "PDF Dosyası (*.pdf)|*.pdf",
+        FileName = $"OturmaPlani_{dersAdi}_{derslik.DerslikAd}.pdf"
+    };
 
-        dynamic tagData = PDFIndirButton.Tag;
-        var derslik = tagData.Derslik as Derslikler;
-        var ogrenciler = tagData.Ogrenciler as List<Ogrenciler>;
-        var secilenDers = SinavListBox.SelectedItem;
-        string dersAdi = secilenDers.GetType().GetProperty("DersAdi").GetValue(secilenDers)?.ToString();
-        
-        var saveFileDialog = new SaveFileDialog
+
+    if (saveFileDialog.ShowDialog() != true) return;
+
+    string fontPath = @"C:\Users\Ecem\RiderProjects\ExamScheduler\Font\NotoSans-VariableFont_wdth,wght.ttf";
+    var font = PdfFontFactory.CreateFont(fontPath, PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
+
+    using (var writer = new PdfWriter(saveFileDialog.FileName))
+    using (var pdf = new PdfDocument(writer))
+    using (var document = new Document(pdf))
+    {
+        // Başlık
+        var boldFont = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
+        document.Add(new Paragraph($"🪑 Oturma Planı - {derslik.DerslikAd}")
+            .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+            .SetFontSize(18)
+            .SetFont(boldFont)
+            .SetMarginBottom(15));
+
+        // UI Görseli PDF'e ekle
+        if (OturmaAlani.ActualWidth > 0 && OturmaAlani.ActualHeight > 0)
         {
-            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-            Filter = "PDF Dosyası (*.pdf)|*.pdf",
-            FileName = $"OturmaPlani_{dersAdi}_{derslik.DerslikAd}.pdf"
-        };
+            OturmaAlani.UpdateLayout();
+            OturmaAlani.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            OturmaAlani.Arrange(new Rect(new Point(0,0), OturmaAlani.DesiredSize));
 
-        if (saveFileDialog.ShowDialog() != true) return;
-       
-        // Font dosya yolu
-        string fontPath = @"C:\Users\Ecem\RiderProjects\ExamScheduler\Font\NotoSans-VariableFont_wdth,wght.ttf";
-        var font = PdfFontFactory.CreateFont(fontPath, PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
 
-        
-      
-        
-        using (var writer = new PdfWriter(saveFileDialog.FileName))
-        using (var pdf = new PdfDocument(writer))
-        using (var document = new Document(pdf))
-        {
-            var boldFont = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
+            int w = (int)(OturmaAlani.ActualWidth * 2);
+            int h = (int)(OturmaAlani.ActualHeight * 2);
 
-            document.Add(new Paragraph($"🪑 Oturma Planı - {derslik.DerslikAd}")
-                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                .SetFontSize(18)
-                .SetFont(boldFont)
-                .SetMarginBottom(15));
+            var rtb = new RenderTargetBitmap(w, h, 180, 180, PixelFormats.Pbgra32);
+            rtb.Render(OturmaAlani);
 
-            // UI görselini PDF'e ekle
-            if (OturmaAlani.ActualWidth > 0 && OturmaAlani.ActualHeight > 0)
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            string tempFile = Path.GetTempFileName() + ".png";
+            using (var fs = new FileStream(tempFile, FileMode.Create))
             {
-                OturmaAlani.UpdateLayout();
-                OturmaAlani.Measure(new Size(OturmaAlani.ActualWidth, OturmaAlani.ActualHeight));
-                OturmaAlani.Arrange(new Rect(new Size(OturmaAlani.ActualWidth, OturmaAlani.ActualHeight)));
-
-                int w = (int)(OturmaAlani.ActualWidth * 2);
-                int h = (int)(OturmaAlani.ActualHeight * 2);
-
-                RenderTargetBitmap rtb = new RenderTargetBitmap(w, h, 185, 185, PixelFormats.Pbgra32);
-                rtb.Render(OturmaAlani);
-
-                PngBitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(rtb));
-
-                string tempFile = Path.GetTempFileName() + ".png";
-                using (var fs = new FileStream(tempFile, FileMode.Create))
-                {
-                    encoder.Save(fs);
-                }
-
-                var pdfImage = new Image(ImageDataFactory.Create(tempFile))
-                    .SetWidth(pdf.GetDefaultPageSize().GetWidth() - 40)
-                    .SetAutoScaleHeight(true)
-                    .SetMarginTop(5);
-
-                document.Add(pdfImage);
-                document.Add(new Paragraph("\n"));
+                encoder.Save(fs);
             }
 
-            // Öğrenci tablosu ekle (CizOturmaDuzeni ile aynı düzeni kullan)
-            var table = new Table(5).UseAllAvailableWidth();
-            table.AddHeaderCell("No");
-            table.AddHeaderCell("Öğrenci No");
-            table.AddHeaderCell("Ad Soyad");
-            table.AddHeaderCell("Sıra");
-            table.AddHeaderCell("Sütun");
+            var pdfImage = new iText.Layout.Element.Image(ImageDataFactory.Create(tempFile))
+                .SetWidth(pdf.GetDefaultPageSize().GetWidth() - 40)
+                .SetAutoScaleHeight(true)
+                .SetAutoScale(true)
+                .SetMarginTop(5);
 
-            int ogrenciIndex = 0;
-            int genelSayac = 1;
-            bool[,,] doluMatris = new bool[derslik.BoyunaSira, derslik.EnineSira, derslik.SiraYapisi];
-            
-        
-
-
-
-            for (int i = 0; i < derslik.BoyunaSira; i++)
-            {
-                for (int j = 0; j < derslik.EnineSira; j++)
-                {
-                    for (int k = 0; k < derslik.SiraYapisi; k++)
-                    {
-                        bool yanYanaVar = false;
-                        if (k > 0 && doluMatris[i, j, k - 1]) yanYanaVar = true;
-                        if (k == 0 && j > 0 && doluMatris[i, j - 1, derslik.SiraYapisi - 1]) yanYanaVar = true;
-
-                        bool onArkaVar = false;
-                        if (i > 0 && doluMatris[i - 1, j, k]) onArkaVar = true;
-
-                        if (!yanYanaVar && (i == 0 || onArkaVar) && ogrenciIndex < ogrenciler.Count)
-                        {
-                            var ogr = ogrenciler[ogrenciIndex++];
-                            doluMatris[i, j, k] = true;
-
-                            table.AddCell(new Cell().Add(new Paragraph(genelSayac.ToString())).SetFont(font));
-                            table.AddCell(new Cell().Add(new Paragraph(ogr.OgrenciNo ?? "-")).SetFont(font));
-                            table.AddCell(new Cell().Add(new Paragraph(ogr.AdSoyad ?? "-")).SetFont(font));
-                            table.AddCell(new Cell().Add(new Paragraph($"Sıra {i + 1}")).SetFont(font));
-                            table.AddCell(new Cell().Add(new Paragraph($"Sütun {j + 1}")).SetFont(font));
-
-                            genelSayac++;
-                        }
-                    }
-                }
-            }
-
-            document.Add(table);
-            document.Close();
+            document.Add(pdfImage);
+            document.Add(new Paragraph("\n"));
         }
 
-        MessageBox.Show("Oturma planı PDF olarak başarıyla kaydedildi.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+        // Öğrenci Tablosu
+        var table = new Table(5).UseAllAvailableWidth();
+        table.AddHeaderCell(new Cell().Add(new Paragraph("Öğrenci No")).SetFont(font));
+        table.AddHeaderCell(new Cell().Add(new Paragraph("Ad Soyad")).SetFont(font));
+        table.AddHeaderCell(new Cell().Add(new Paragraph("Sütun")).SetFont(font));
+        table.AddHeaderCell(new Cell().Add(new Paragraph("Sıra")).SetFont(font));
+        table.AddHeaderCell(new Cell().Add(new Paragraph("Koltuk No")).SetFont(font));
+
+        // Seçili derslik öğrencilerini al
+        var seciliKoltuklar = KoltukAtamaListesi
+            .Where(k => ogrenciler.Contains(k.ogr))
+            .GroupBy(k => k.ogr.OgrenciNo) // Öğrenci No’ya göre gruplama
+            .Select(g => g.First())        // Tek kayıt al
+            .OrderBy(k => k.Sira)
+            .ThenBy(k => k.Sutun)
+            .ThenBy(k => k.KoltukNo)
+            .ToList();
+        
+// Sıra bazlı ekleme (UI’deki düzenle aynı)
+        foreach (var kayit in seciliKoltuklar)
+        {
+            table.AddCell(new Cell().Add(new Paragraph(kayit.ogr.OgrenciNo ?? "-")).SetFont(font));
+            table.AddCell(new Cell().Add(new Paragraph(kayit.ogr.AdSoyad ?? "-")).SetFont(font));
+            table.AddCell(new Cell().Add(new Paragraph($"{kayit.Sira}")).SetFont(font));
+            table.AddCell(new Cell().Add(new Paragraph($"{kayit.Sutun}")).SetFont(font));
+            table.AddCell(new Cell().Add(new Paragraph($"Koltuk {kayit.KoltukNo}")).SetFont(font));
+        }
+
+        document.Add(table);
+    }
+
+    MessageBox.Show("Oturma planı PDF olarak başarıyla kaydedildi.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
 }
+
 
 
    

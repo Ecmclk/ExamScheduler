@@ -9,11 +9,20 @@ namespace ExamScheduler.UI.Ekranlar
     public partial class BolumYonetimi : UserControl
     {
         private readonly AppDbContext _context;
+        private readonly int _kullaniciRol;
 
-        public BolumYonetimi()
+        public BolumYonetimi(int kullaniciRol)
         {
             InitializeComponent();
             _context = new AppDbContext();
+            _kullaniciRol = kullaniciRol;
+            
+            if (_kullaniciRol != 1)
+            {
+                this.Visibility = Visibility.Collapsed;
+                MessageBox.Show("Bu alan sadece admin kullanıcılarına açıktır.", "Erişim Engellendi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             LoadBolumler();
         }
 

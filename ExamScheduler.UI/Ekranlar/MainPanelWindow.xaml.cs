@@ -12,32 +12,54 @@ namespace ExamScheduler.UI
         private readonly DersService _dersService;
         private readonly OgrenciService _ogrenciService;
         private readonly AppDbContext _context;
+        private readonly int _kullaniciRol;
+        private readonly int? _kullaniciBolumId;
   
         private List<SinavKaydi> _olusturulanProgram;
         public List<SinavKaydi> OlusturulanProgram => _olusturulanProgram;
+        public AppDbContext Context => _context;
 
         public SinavKaydi SonOluşturulanSinav { get; set; }
         public List<Ogrenciler> SonSinavOgrencileri { get; set; }
-        public MainPanelWindow()
+        public MainPanelWindow(int kullaniciRol, int? kullaniciBolumId = null)
         {
             InitializeComponent();
-
-            // ✅ Context'i burada başlat
+    
+            _kullaniciRol = kullaniciRol; 
+            _kullaniciBolumId = kullaniciBolumId;
+    
             _context = new AppDbContext();
-
-            // ✅ Servisleri context ile başlat
             _dersService = new DersService(_context);
             _ogrenciService = new OgrenciService(_context);
 
-            // Varsayılan olarak kontrol paneli gelsin
-            LoadUserControl(new KontrolPaneli());
-            
+            LoadUserControl(new KontrolPaneli(_kullaniciRol, _kullaniciBolumId));
 
-            // Menü kontrolü
-            _ = CheckIfExamMenuShouldBeVisible();
-            
+            Loaded += MainPanelWindow_Loaded; // Window yüklendikten sonra menüleri güncelle
         }
 
+        private async void MainPanelWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await CheckIfExamMenuShouldBeVisible();
+            UpdateMenuAvailability();
+        }
+        public void UpdateMenuAvailability()
+        {
+            if (_kullaniciRol == 1) // Admin her zaman açık
+            {
+                DersButton.IsEnabled = true;
+                OgrenciButton.IsEnabled = true;
+                SinavProgramiButton.IsEnabled = true;
+            }
+            else // Koordinatör
+            {
+                bool derslikVar = _context.Derslikler.Any(d => d.BolumId == _kullaniciBolumId);
+                DersButton.IsEnabled = derslikVar;
+                OgrenciButton.IsEnabled = derslikVar;
+                SinavProgramiButton.IsEnabled = derslikVar;
+            }
+        }
+
+        
         /// <summary>
         /// Verilen UserControl'ü içerik alanına yükler.
         /// </summary>
@@ -48,32 +70,36 @@ namespace ExamScheduler.UI
 
         private void KontrolPaneliButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadUserControl(new KontrolPaneli());
+            LoadUserControl(new KontrolPaneli(_kullaniciRol, _kullaniciBolumId));
         }
 
         private void BolumButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadUserControl(new BolumYonetimi());
+            LoadUserControl(new BolumYonetimi(_kullaniciRol));
         }
 
         private void DersButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadUserControl(new DersYonetimi());
+            var dersYonetimi = new DersYonetimi(_kullaniciRol, _kullaniciBolumId);
+            LoadUserControl(dersYonetimi);
+            
         }
 
         private void OgrenciButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadUserControl(new OgrenciYonetimi());
+            LoadUserControl(new OgrenciYonetimi(_kullaniciRol, _kullaniciBolumId));
         }
 
         private void KullaniciButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadUserControl(new KullaniciYonetimi());
+            LoadUserControl(new KullaniciYonetimi(_kullaniciRol));
         }
 
         private void DerslikButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadUserControl(new DerslikYonetimi());
+            LoadUserControl(new DerslikYonetimi(_kullaniciRol, _kullaniciBolumId ?? 1, _context));
+
+            
         }
 
         private void CikisButton_Click(object sender, RoutedEventArgs e)
@@ -103,7 +129,8 @@ namespace ExamScheduler.UI
 
         private void SinavProgrami_Click(object sender, RoutedEventArgs e)
         {
-            var sinavKontrol = new SinavProgramiOlustur(_context);
+            var sinavKontrol = new SinavProgramiOlustur(_context, _kullaniciRol, _kullaniciBolumId);
+
 
             // Event ile _olusturulanProgram’ı al
             sinavKontrol.SinavProgramiOlusturuldu += (program) =>

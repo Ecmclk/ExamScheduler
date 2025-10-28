@@ -11,12 +11,16 @@ namespace ExamScheduler.UI.Ekranlar
     {
         private readonly AppDbContext _context;
         private readonly OgrenciService _ogrenciService;
+        private readonly int _kullaniciRol;
+        private readonly int? _kullaniciBolumId;
 
-        public OgrenciYonetimi()
+        public OgrenciYonetimi(int kullaniciRol, int? kullaniciBolumId = null)
         {
             InitializeComponent();
             _context = new AppDbContext();
             _ogrenciService = new OgrenciService(_context);
+            _kullaniciRol = kullaniciRol;
+            _kullaniciBolumId = kullaniciBolumId;
             LoadBolumlerFiltre();
             _ = LoadOgrencilerAsync(); // async çağrı
         }
@@ -24,11 +28,32 @@ namespace ExamScheduler.UI.Ekranlar
         private void LoadBolumlerFiltre()
         {
             var bolumler = _context.Bolumler.ToList();
-            bolumler.Insert(0, new Bolumler { BolumId = 0, BolumAd = "Tüm Bölümler" });
-            BolumFiltreComboBox.ItemsSource = bolumler;
-            BolumFiltreComboBox.DisplayMemberPath = "BolumAd";
-            BolumFiltreComboBox.SelectedValuePath = "BolumID";
-            BolumFiltreComboBox.SelectedIndex = 0;
+
+            if (_kullaniciRol == 1) // Admin ise
+            {
+                bolumler.Insert(0, new Bolumler { BolumId = 0, BolumAd = "Tüm Bölümler" });
+                BolumFiltreComboBox.ItemsSource = bolumler;
+                BolumFiltreComboBox.DisplayMemberPath = "BolumAd";
+                BolumFiltreComboBox.SelectedValuePath = "BolumId";
+                BolumFiltreComboBox.SelectedIndex = 0;
+                BolumFiltreComboBox.IsEnabled = true;
+            }
+            else // Bölüm koordinatörü ise
+            {
+                var kendiBolumu = bolumler.FirstOrDefault(b => b.BolumId == _kullaniciBolumId);
+                if (kendiBolumu != null)
+                {
+                    BolumFiltreComboBox.ItemsSource = new List<Bolumler> { kendiBolumu };
+                    BolumFiltreComboBox.DisplayMemberPath = "BolumAd";
+                    BolumFiltreComboBox.SelectedValuePath = "BolumId";
+                    BolumFiltreComboBox.SelectedIndex = 0;
+                    BolumFiltreComboBox.IsEnabled = false;
+                }
+                else
+                {
+                    MessageBox.Show("Kullanıcının kayıtlı olduğu bölüm bulunamadı.", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private async Task LoadOgrencilerAsync()
@@ -69,9 +94,7 @@ namespace ExamScheduler.UI.Ekranlar
             await LoadOgrencilerAsync();
         }
 
-
-
-
+        
         private async void SilOgrenciButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -91,6 +114,7 @@ namespace ExamScheduler.UI.Ekranlar
 
        private async void ExcelYukleButton_Click(object sender, RoutedEventArgs e)
 {
+    var bolumId = ((Bolumler)BolumFiltreComboBox.SelectedItem).BolumId;
     string filePath = null;
 
     // OpenFileDialog'u UI thread üzerinden aç
@@ -114,7 +138,7 @@ namespace ExamScheduler.UI.Ekranlar
     try
     {
         var parser = new OgrenciListesiExcelParser();
-        var parseResult = await parser.ParseAsync(filePath);
+        var parseResult = await parser.ParseAsync(filePath,bolumId);
 
         if (parseResult.Errors.Any())
         {

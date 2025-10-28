@@ -16,8 +16,9 @@ namespace ExamScheduler.UI.Ekranlar
         private readonly AppDbContext _context;
         private readonly DersService _dersService;
         private readonly DersListesiExcelParser _excelParser;
-
-        public DersYonetimi()
+        private readonly int _kullaniciRol;
+        private readonly int? _kullaniciBolumId;
+        public DersYonetimi(int kullaniciRol, int? kullaniciBolumId = null)
         {
             InitializeComponent();
 
@@ -25,6 +26,9 @@ namespace ExamScheduler.UI.Ekranlar
             _dersService = new DersService(_context);
             _excelParser = new DersListesiExcelParser();
 
+            _kullaniciRol = kullaniciRol;
+            _kullaniciBolumId = kullaniciBolumId;
+            
             LoadBolumlerFiltre();
             _ = LoadDerslerAsync();
         }
@@ -32,12 +36,34 @@ namespace ExamScheduler.UI.Ekranlar
         private void LoadBolumlerFiltre()
         {
             var bolumler = _context.Bolumler.ToList();
-            bolumler.Insert(0, new Bolumler { BolumId = 0, BolumAd = "Tüm Bölümler" });
 
-            BolumFiltreComboBox.ItemsSource = bolumler;
-            BolumFiltreComboBox.DisplayMemberPath = "BolumAd";
-            BolumFiltreComboBox.SelectedValuePath = "BolumId";
-            BolumFiltreComboBox.SelectedIndex = 0;
+            // Eğer adminse (RolId = 1) tüm bölümler görünsün
+            if (_kullaniciRol == 1)
+            {
+                bolumler.Insert(0, new Bolumler { BolumId = 0, BolumAd = "Tüm Bölümler" });
+                BolumFiltreComboBox.ItemsSource = bolumler;
+                BolumFiltreComboBox.DisplayMemberPath = "BolumAd";
+                BolumFiltreComboBox.SelectedValuePath = "BolumId";
+                BolumFiltreComboBox.SelectedIndex = 0;
+                BolumFiltreComboBox.IsEnabled = true;
+            }
+            else
+            {
+                // Bölüm koordinatörü sadece kendi bölümünü görür
+                var kendiBolumu = bolumler.FirstOrDefault(b => b.BolumId == _kullaniciBolumId);
+                if (kendiBolumu != null)
+                {
+                    BolumFiltreComboBox.ItemsSource = new List<Bolumler> { kendiBolumu };
+                    BolumFiltreComboBox.DisplayMemberPath = "BolumAd";
+                    BolumFiltreComboBox.SelectedValuePath = "BolumId";
+                    BolumFiltreComboBox.SelectedIndex = 0;
+                    BolumFiltreComboBox.IsEnabled = false; // 👈 Değiştirilemesin
+                }
+                else
+                {
+                    MessageBox.Show("Bölüm koordinatörünün kayıtlı olduğu bölüm bulunamadı.", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private async Task LoadDerslerAsync()
@@ -95,6 +121,8 @@ namespace ExamScheduler.UI.Ekranlar
 
         private async void ExcelYukleButton_Click(object sender, RoutedEventArgs e)
         {
+            var bolumId = ((Bolumler)BolumFiltreComboBox.SelectedItem).BolumId;
+            
             string filePath = null;
 
             // OpenFileDialog'u UI thread üzerinden aç
@@ -118,7 +146,7 @@ namespace ExamScheduler.UI.Ekranlar
             try
             {
                 // Excel parser ile dosyayı oku
-                var parseResult = await _excelParser.ParseAsync(filePath);
+                var parseResult = await _excelParser.ParseAsync(filePath,bolumId);
 
                 if (parseResult.Errors.Any())
                 {

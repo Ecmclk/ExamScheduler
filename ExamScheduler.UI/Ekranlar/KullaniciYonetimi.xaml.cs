@@ -11,16 +11,22 @@ namespace ExamScheduler.UI.Ekranlar
 {
     public partial class KullaniciYonetimi : UserControl
     {
+        private readonly int _kullaniciRol;
         private readonly AppDbContext _context;
         private readonly UserService _userService;
 
-        public KullaniciYonetimi()
+        public KullaniciYonetimi(int kullaniciRol)
         {
             InitializeComponent();
-
+            _kullaniciRol = kullaniciRol;
             _context = new AppDbContext();
             _userService = new UserService(_context);
-
+            if (_kullaniciRol != 1)
+            {
+                this.Visibility = Visibility.Collapsed;
+                MessageBox.Show("Bu alan sadece admin kullanıcılarına açıktır.", "Erişim Engellendi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             // Ekran yüklendiğinde hem Bölüm listesini hem de Kullanıcı listesini doldur.
             LoadBolumler();
             LoadUsers();

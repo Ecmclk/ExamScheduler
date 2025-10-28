@@ -8,11 +8,14 @@ namespace ExamScheduler.UI.Ekranlar
     public partial class KontrolPaneli : UserControl
     {
         private readonly AppDbContext _context;
-
-        public KontrolPaneli()
+        private readonly int _kullaniciRol;
+        private readonly int? _kullaniciBolumId;
+        public KontrolPaneli(int kullaniciRol, int? kullaniciBolumId = null,AppDbContext context = null)
         {
             InitializeComponent();
-            _context = new AppDbContext();
+            _context = context ?? new AppDbContext();
+            _kullaniciRol = kullaniciRol;
+            _kullaniciBolumId = kullaniciBolumId;;
             LoadStatistics();
         }
 
@@ -28,27 +31,40 @@ namespace ExamScheduler.UI.Ekranlar
         // Alt ekranlara yönlendirme (MainPanelWindow içinde tanımlı Content alanına geçiş)
         private void BolumButton_Click(object sender, RoutedEventArgs e)
         {
-            (Window.GetWindow(this) as MainPanelWindow)?.LoadUserControl(new BolumYonetimi());
+            (Window.GetWindow(this) as MainPanelWindow)?
+                .LoadUserControl(new BolumYonetimi(_kullaniciRol));
         }
 
         private void DersButton_Click(object sender, RoutedEventArgs e)
         {
-            (Window.GetWindow(this) as MainPanelWindow)?.LoadUserControl(new DersYonetimi());
+            (Window.GetWindow(this) as MainPanelWindow)?
+                .LoadUserControl(new DersYonetimi(_kullaniciRol, _kullaniciBolumId));
         }
 
         private void OgrenciButton_Click(object sender, RoutedEventArgs e)
         {
-            (Window.GetWindow(this) as MainPanelWindow)?.LoadUserControl(new OgrenciYonetimi());
+            (Window.GetWindow(this) as MainPanelWindow)?
+                .LoadUserControl(new OgrenciYonetimi(_kullaniciRol, _kullaniciBolumId));
         }
 
         private void KullaniciButton_Click(object sender, RoutedEventArgs e)
         {
-            (Window.GetWindow(this) as MainPanelWindow)?.LoadUserControl(new KullaniciYonetimi());
+            (Window.GetWindow(this) as MainPanelWindow)?
+                .LoadUserControl(new KullaniciYonetimi(_kullaniciRol));
         }
+        
 
         private void DerslikButton_Click(object sender, RoutedEventArgs e)
         {
-            (Window.GetWindow(this) as MainPanelWindow)?.LoadUserControl(new DerslikYonetimi());
+            var mainWindow = Window.GetWindow(this) as MainPanelWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.LoadUserControl(
+                    new DerslikYonetimi(_kullaniciRol, _kullaniciBolumId ?? 1, mainWindow.Context)
+                );
+            }
+
+            
         }
     }
 }

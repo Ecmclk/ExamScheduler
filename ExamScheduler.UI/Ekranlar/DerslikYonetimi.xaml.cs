@@ -12,65 +12,103 @@ namespace ExamScheduler.UI.Ekranlar
     {
         private readonly AppDbContext _context;
         private Derslikler _duzenlenen; // düzenleme modunda tutulan kayıt
-        private int _koordinatorBolumId; // giriş yapan koordinatörün bölümü
+       
+        private int _koordinatorBolumId;
+        private int _kullaniciRol;// giriş yapan koordinatörün bölümü
 
-        public DerslikYonetimi()
+        public DerslikYonetimi(int kullaniciRol, int koordinatorBolumId, AppDbContext context)
         {
             InitializeComponent();
-            _context = new AppDbContext();
-            _koordinatorBolumId = ResolveKoordinatorBolumId();
+           
+            _context = context; 
+            _kullaniciRol = kullaniciRol;
+            _koordinatorBolumId = koordinatorBolumId;
+            
+            LoadBolumlerCombo();  // Combobox yükleme
             LoadDerslikler(); // sadece koordinatörün bölümündekiler
         }
-
-        // Koordinatörün BolumId’sini otomatık çöz.
-        // Uygulamada CurrentUser nesnesini nerede tuttuğuna göre bu metodu uyarlayabilirsin.
-        private int ResolveKoordinatorBolumId()
+        
+        
+       
+        
+        // Combobox doldurma
+        private void LoadBolumlerCombo()
         {
-            try
-            {
-                // Örnek 1: Application.Current.Properties üzerinden
-                if (Application.Current?.Properties != null &&
-                    Application.Current.Properties.Contains("CurrentUser") &&
-                    Application.Current.Properties["CurrentUser"] is Kullanicilar k1 &&
-                    k1.BolumId.HasValue)
-                {
-                    return k1.BolumId.Value;
-                }
+            var bolumler = _context.Bolumler.OrderBy(b => b.BolumAd).ToList();
 
-                // Örnek 2: Ana pencerede CurrentUser property’si varsa
-                var win = Application.Current?.MainWindow as Window;
-                var mainPanelType = win?.GetType();
-                var prop = mainPanelType?.GetProperty("CurrentUser");
-                if (prop != null)
+            if (_kullaniciRol == 1) // Admin
+            {
+                bolumler.Insert(0, new Bolumler { BolumId = 0, BolumAd = "Tüm Bölümler" });
+                BolumComboBox.ItemsSource = bolumler;
+                BolumComboBox.DisplayMemberPath = "BolumAd";
+                BolumComboBox.SelectedValuePath = "BolumId";
+                BolumComboBox.SelectedIndex = 0;
+                BolumComboBox.IsEnabled = true; // admin her zaman değiştirebilir
+            }
+            else // Koordinatör
+            {
+                var kendiBolumu = bolumler.FirstOrDefault(b => b.BolumId == _koordinatorBolumId);
+                if (kendiBolumu != null)
                 {
-                    var k2 = prop.GetValue(win) as Kullanicilar;
-                    if (k2?.BolumId != null) return k2.BolumId.Value;
+                    BolumComboBox.ItemsSource = new List<Bolumler> { kendiBolumu };
+                    BolumComboBox.DisplayMemberPath = "BolumAd";
+                    BolumComboBox.SelectedValuePath = "BolumId";
+                    BolumComboBox.SelectedIndex = 0;
+                    BolumComboBox.IsEnabled = false;
                 }
             }
-            catch { /* yumuşak düş */ }
-
-            // Son çare: 1. bölüm varsayımı (geliştirirken boş geçmesin diye).
-            return 1;
         }
+
 
         // Liste yükleme (+ opsiyonel arama)
         private void LoadDerslikler(string arama = null)
         {
-            var q = _context.Derslikler
-                            .Include(d => d.Bolum)
-                            .Where(d => d.BolumId == _koordinatorBolumId);
-
-            if (!string.IsNullOrWhiteSpace(arama))
+            try
             {
-                var s = arama.Trim().ToLower();
-                q = q.Where(d => d.DerslikAd.ToLower().Contains(s) ||
-                                 d.DerslikKod.ToLower().Contains(s));
-            }
+                using var context = new AppDbContext();
+                var allDerslikler = context.Derslikler.Include(d => d.Bolum).ToList();
 
-            DersliklerDataGrid.ItemsSource = q
-                .OrderBy(d => d.DerslikAd)
-                .ToList();
+                if (_kullaniciRol != 1) // Koordinatör
+                {
+                    // Sadece kendi bölümünü göster
+                    allDerslikler = allDerslikler
+                        .Where(d => d.BolumId == _koordinatorBolumId)
+                        .ToList();
+                }
+                else // Admin
+                {
+                    // Admin için combobox filtre uygulaması
+                    if (BolumComboBox.SelectedItem is Bolumler seciliBolum && seciliBolum.BolumId != 0)
+                    {
+                        allDerslikler = allDerslikler
+                            .Where(d => d.BolumId == seciliBolum.BolumId)
+                            .ToList();
+                    }
+                    // Eğer 0 seçiliyse "Tüm Bölümler", filtre uygulanmaz
+                }
+
+                // Arama filtresi
+                if (!string.IsNullOrWhiteSpace(arama))
+                {
+                    string s = arama.Trim().ToLower();
+                    allDerslikler = allDerslikler
+                        .Where(d => d.DerslikAd.ToLower().Contains(s) || d.DerslikKod.ToLower().Contains(s))
+                        .ToList();
+                }
+
+                DersliklerDataGrid.ItemsSource = allDerslikler
+                    .OrderBy(d => d.DerslikAd)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Derslik listesi yüklenirken hata oluştu: {ex.Message}", "Hata",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+
+
 
         // Kaydet: yeni kayıt ekleme
         private void EkleButton_Click(object sender, RoutedEventArgs e)
@@ -94,6 +132,8 @@ namespace ExamScheduler.UI.Ekranlar
                 _context.SaveChanges();
                 MessageBox.Show("Derslik başarıyla eklendi.", "Bilgi",
                                 MessageBoxButton.OK, MessageBoxImage.Information);
+                var mainWindow = Window.GetWindow(this) as MainPanelWindow;
+                mainWindow?.UpdateMenuAvailability();
                 TemizleForm();
                 LoadDerslikler(AramaTextBox.Text);
             }
@@ -242,6 +282,15 @@ namespace ExamScheduler.UI.Ekranlar
                 pencere.ShowDialog();
             }
         }
+        
+        private void BolumComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_kullaniciRol == 1) // admin
+            {
+                LoadDerslikler(); 
+            }
+        }
+
 
         // Formu oku & doğrula — model dön
         private bool TryReadForm(out Derslikler model, out string mesaj)
@@ -263,11 +312,13 @@ namespace ExamScheduler.UI.Ekranlar
                 mesaj = "Kapasite pozitif bir sayı olmalıdır.";
                 return false;
             }
+
             if (!int.TryParse(EnineSiraTextBox.Text, out int enine) || enine <= 0)
             {
                 mesaj = "Enine sıra sayısı pozitif bir sayı olmalıdır.";
                 return false;
             }
+
             if (!int.TryParse(BoyunaSiraTextBox.Text, out int boyuna) || boyuna <= 0)
             {
                 mesaj = "Boyuna sıra sayısı pozitif bir sayı olmalıdır.";
@@ -276,15 +327,18 @@ namespace ExamScheduler.UI.Ekranlar
 
             if (SiraYapisiComboBox.SelectedItem is not ComboBoxItem cb ||
                 !byte.TryParse(cb.Content?.ToString(), out byte siraYapisi) ||
-                (siraYapisi != 2 && siraYapisi != 3))
+                (siraYapisi != 2 && siraYapisi != 3 && siraYapisi != 4))
             {
                 mesaj = "Sıra yapısı 2 veya 3 olmalıdır.";
                 return false;
             }
 
+            // Bölüm combobox
+            int bolumId = (int)(BolumComboBox.SelectedValue ?? _koordinatorBolumId);
+
             model = new Derslikler
             {
-                BolumId = _koordinatorBolumId,
+                BolumId = bolumId,
                 DerslikKod = kod,
                 DerslikAd = ad,
                 Kapasite = kapasite,
@@ -294,6 +348,7 @@ namespace ExamScheduler.UI.Ekranlar
             };
             return true;
         }
+
 
         // Formu sıfırla & moddan çık
         private void TemizleForm()

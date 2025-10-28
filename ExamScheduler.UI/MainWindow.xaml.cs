@@ -16,6 +16,7 @@ namespace ExamScheduler.UI
             _context = new AppDbContext();
             _userService = new UserService(_context);
         }
+        
 
         private void GirisButton_Click(object sender, RoutedEventArgs e)
         {
@@ -25,6 +26,7 @@ namespace ExamScheduler.UI
             if (string.IsNullOrEmpty(eposta) || string.IsNullOrEmpty(sifre))
             {
                 UyariText.Text = "E-posta ve şifre alanları boş olamaz.";
+                UyariBorder.Visibility = Visibility.Visible;
                 return;
             }
 
@@ -33,6 +35,7 @@ namespace ExamScheduler.UI
             if (user == null)
             {
                 UyariText.Text = "Geçersiz e-posta veya şifre.";
+                UyariBorder.Visibility = Visibility.Visible;
                 return;
             }
 
@@ -40,13 +43,22 @@ namespace ExamScheduler.UI
             if (!user.Aktiflik)
             {
                 UyariText.Text = "Bu kullanıcı hesabı pasif durumda.";
+                UyariBorder.Visibility = Visibility.Visible;
                 return;
             }
+            
+            // Örnek: login sonrası
+            var girisYapanKullanici = _context.Kullanicilar.FirstOrDefault(k => k.Eposta == EpostaTextBox.Text);
+
+// Kullanıcının rolünü ve bölümünü al
+            int rol = girisYapanKullanici.RolId;
+            int? bolumId = girisYapanKullanici.BolumId;
 
             // Başarılı giriş
-            var panel = new MainPanelWindow();
-            Application.Current.MainWindow = panel; // 🔽 Burası çok önemli
-            panel.Show();
+            var anaPencere = new MainPanelWindow(rol, bolumId);
+            Application.Current.MainWindow = anaPencere; // 🔽 Burası çok önemli
+            anaPencere.Show();
+            
             this.Close();
 
         }
@@ -59,9 +71,9 @@ namespace ExamScheduler.UI
                 var userService = new UserService(_context);
 
                 bool added = userService.AddUser(
-                    adSoyad: "abc",
-                    eposta: "abc@mail.com",
-                    sifre: "123",
+                    adSoyad: "Admin",
+                    eposta: "admin@mail.com",
+                    sifre: "1",
                     rolId: 1,
                     bolumId: 1
                 );

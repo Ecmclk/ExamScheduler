@@ -352,12 +352,15 @@
                                    Margin="0,0,0,20"/>
 
                         <!-- Derslik Kodu ve Adı -->
+                       <!-- Derslik Kodu, Adı ve Bölüm -->
                         <Grid Margin="0,0,0,15">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="140"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="15"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="15"/>
                                 <RowDefinition Height="Auto"/>
@@ -380,6 +383,17 @@
                                      Style="{StaticResource ModernTextBox}"
                                      MaxWidth="350"
                                      HorizontalAlignment="Left"/>
+
+                            <TextBlock Text="Bölüm:" 
+                                       Grid.Row="4" Grid.Column="0"
+                                       Style="{StaticResource LabelStyle}"/>
+                            <ComboBox x:Name="BolumComboBox" 
+                                      Grid.Row="4" Grid.Column="1"
+                                      Style="{StaticResource ModernComboBox}"
+                                      MaxWidth="350"
+                                      HorizontalAlignment="Left"
+                                      DisplayMemberPath="BolumAd"
+                                      SelectionChanged="BolumComboBox_SelectionChanged"/>
                         </Grid>
 
                         <!-- Kapasite ve Sıra Bilgileri -->
@@ -431,6 +445,7 @@
                                 <ComboBoxItem Content="4"/>
                                 
                             </ComboBox>
+                           
                         </Grid>
 
                         <!-- Butonlar -->
