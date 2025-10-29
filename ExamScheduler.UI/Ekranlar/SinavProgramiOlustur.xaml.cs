@@ -305,7 +305,7 @@ private async void ProgramiOlusturButton_Click(object sender, RoutedEventArgs e)
                             kalanOgrenci -= salon.Kapasite;
                         }
 
-// Eğer öğrenci sayısını yerleştirebildiyse
+                        // Eğer öğrenci sayısını yerleştirebildiyse
                         if (kalanOgrenci <= 0)
                         {
                             uygunSaat = saat;
